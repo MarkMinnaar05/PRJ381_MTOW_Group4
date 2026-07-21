@@ -16,7 +16,7 @@ mtow-platform/
 
 ### Cloning the repo
 ```bash
-git clone <repo-url>
+git clone <[repo-url](https://github.com/MarkMinnaar05/PRJ381_MTOW_Group4.git)>
 cd mtow-platform
 ```
 
@@ -25,16 +25,9 @@ This project uses Git LFS to handle large binary files (images, audio, etc.). In
 ```bash
 git lfs install
 ```
+Do note that you should open cmd inside the repo folder on your pc, just shift + right click 
+and select "Open Powershell here" or "Open Git Bash here" if you have git bash installed
 
-### Working on the Unity client
-1. Open Unity Hub → Add Project → select the `unity-client/` folder.
-2. Make sure your Unity version matches the one specified in `unity-client/ProjectVersion.txt` (avoids compatibility issues).
-3. Do not commit the `Library/`, `Temp/`, or `obj/` folders — these are already covered by `.gitignore`.
-
-### Working on the backend
-1. `cd backend`
-2. `npm install`
-3. `npm run dev` to start the local server
 
 ## Branching Strategy
 
