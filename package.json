@@ -1,0 +1,28 @@
+{
+  "name": "prj381_mtow_group4",
+  "version": "1.0.0",
+  "description": "Interactive competitive mathematics learning platform — VIR-BCOM Group 4.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MarkMinnaar05/PRJ381_MTOW_Group4.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/MarkMinnaar05/PRJ381_MTOW_Group4/issues"
+  },
+  "homepage": "https://github.com/MarkMinnaar05/PRJ381_MTOW_Group4#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "socket.io": "^4.8.3"
+  }
+}
