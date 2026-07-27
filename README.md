@@ -6,8 +6,8 @@ Interactive competitive mathematics learning platform — VIR-BCOM Group 4.
 
 ```
 mtow-platform/
-  unity-client/   ← Unity project (game UI/interface)
   backend/        ← Node.js / Express server, database logic
+  frontend/       ← Views and other ejs files
   docs/           ← Project documentation, diagrams, reports
   README.md
 ```
@@ -78,3 +78,4 @@ Keep commits short and descriptive:
 
 - Mock/sample data should be used where a dependency (backend, analytics, etc.) isn't ready yet — see the sprint plan's "flexible rule" for each phase.
 - Questions or blockers → raise in the team chat as early as possible so tasks don't stall.
+- Since Unity requires a lot of space in the repo, I will be providing builds of the unity project as a Release. You will be able to find it under the "Releases" tab above the contributors on the home page.
