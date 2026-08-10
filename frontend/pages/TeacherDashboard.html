@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Math Tug-of-War — Teacher</title>
+  <link rel="stylesheet" href="/frontend/styles/main.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="logo">
+      <div class="logo-icon"><span><span class="r">←</span><span class="s">∑</span><span class="b">→</span></span></div>
+      <span class="logo-text">Math <span class="red">Tug</span><span class="yellow">-of-</span><span class="blue">War</span></span>
+    </div>
+    <nav class="nav-links">
+      <a href="/frontend/index.html">Home</a>
+      <a href="/frontend/pages/Play.html">Play</a>
+      <a href="/frontend/pages/GameModes.html">Modes</a>
+      <a href="/frontend/pages/Leaderboard.html">Leaderboard</a>
+      <a href="/frontend/pages/StudentDashboard.html" class="student-link">My progress</a>
+      <a href="/frontend/pages/TeacherDashboard.html" class="active teacher-link">Teacher</a>
+    </nav>
+    <a href="javascript:void(0);" class="icon" onclick="myFunction()">&#9776;</a>
+    <div class="header-actions">
+      <div class="user-badge" id="userBadge">
+        <span class="avatar" id="headerAvatar"></span>
+        <span class="name" id="headerName">Teacher</span>
+      </div>
+      <a href="javascript:void(0);" class="btn-signout" id="signOutBtn">Sign out</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="teacher-header">
+        <div>
+          <span>Teacher</span>
+          <h1>Class dashboard</h1>
+          <p style="color:var(--slate-600);">Manage classes, host live games, and track student performance.</p>
+        </div>
+        <div class="actions">
+          <button class="host">+ Host live game</button>
+        </div>
+      </div>
+
+      <div class="class-tabs">
+        <button><div>Grade 3B</div></button>
+        <button><div>Grade 2A</div></button>
+        <button><div>Grade 1C</div></button>
+        <button class="add">+ New class</button>
+      </div>
+
+      <div class="metrics">
+        <div class="metric"><div class="label">Students</div><div class="value" style="color:var(--blue);">5</div></div>
+        <div class="metric"><div class="label">Online now</div><div class="value" style="color:#0a8f4a;">3</div></div>
+        <div class="metric"><div class="label">Avg accuracy</div><div class="value" style="color:var(--yellow);">85%</div></div>
+        <div class="metric"><div class="label">Avg XP</div><div class="value" style="color:var(--red);">3,966</div></div>
+      </div>
+
+      <div class="teacher-tabs">
+        <button class="active" data-ttab="students">Students</button>
+        <button data-ttab="games">Games</button>
+        <button data-ttab="analytics">Analytics</button>
+      </div>
+
+      <!-- ===== Students Tab ===== -->
+      <div id="teacherStudents">
+        <div class="teacher-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Status</th>
+                <th class="text-right">XP</th>
+                <th class="text-right">Wins</th>
+                <th class="text-right">Accuracy</th>
+                <th class="text-right">Streak</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="student"><span class="avatar">&#129418;</span><div><span class="name">Amina</span><div class="grade">Grade 3</div></div></div></td>
+                <td><span class="status" style="background:#FFDA13;"><span class="dot"></span>playing</span></td>
+                <td class="text-right xp">4,820</td>
+                <td class="text-right wins">42</td>
+                <td class="text-right acc">92%</td>
+                <td class="text-right streak">&#128293; 8</td>
+              </tr>
+              <tr>
+                <td><div class="student"><span class="avatar">&#128047;</span><div><span class="name">Kabelo</span><div class="grade">Grade 2</div></div></div></td>
+                <td><span class="status" style="background:#0a8f4a;"><span class="dot"></span>online</span></td>
+                <td class="text-right xp">4,610</td>
+                <td class="text-right wins">39</td>
+                <td class="text-right acc">89%</td>
+                <td class="text-right streak">&#128293; 6</td>
+              </tr>
+              <tr>
+                <td><div class="student"><span class="avatar">&#128053;</span><div><span class="name">Liam</span><div class="grade">Grade 1</div></div></div></td>
+                <td><span class="status" style="background:#94a3b8;"><span class="dot"></span>offline</span></td>
+                <td class="text-right xp">4,180</td>
+                <td class="text-right wins">35</td>
+                <td class="text-right acc">87%</td>
+                <td class="text-right streak">&#128293; 3</td>
+              </tr>
+              <tr>
+                <td><div class="student"><span class="avatar">&#128056;</span><div><span class="name">Sipho</span><div class="grade">Grade 3</div></div></div></td>
+                <td><span class="status" style="background:#0a8f4a;"><span class="dot"></span>online</span></td>
+                <td class="text-right xp">3,560</td>
+                <td class="text-right wins">29</td>
+                <td class="text-right acc">81%</td>
+                <td class="text-right streak">&#128293; 2</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== Games Tab ===== -->
+      <div id="teacherGames" style="display:none;">
+        <div class="live-games">
+          <div class="live-game">
+            <div class="top">
+              <div><div class="title" style="font-weight:800;">Multiplication warm-up</div><div style="font-size:0.875rem;color:var(--slate-500);">12 players</div></div>
+              <span class="live-badge">LIVE</span>
+            </div>
+            <div class="progress"><div class="red-fill" style="width:58%;"></div><div class="blue-fill" style="width:42%;"></div></div>
+            <div class="labels"><span class="red">Red 58%</span><span class="blue">Blue 42%</span></div>
+          </div>
+          <div class="live-game">
+            <div class="top">
+              <div><div class="title" style="font-weight:800;">Grade 3 finals</div><div style="font-size:0.875rem;color:var(--slate-500);">8 players</div></div>
+              <span class="live-badge">LIVE</span>
+            </div>
+            <div class="progress"><div class="red-fill" style="width:30%;"></div><div class="blue-fill" style="width:70%;"></div></div>
+            <div class="labels"><span class="red">Red 30%</span><span class="blue">Blue 70%</span></div>
+          </div>
+          <div style="background:white;border:2px dashed var(--slate-300);border-radius:var(--radius-lg);padding:2rem;text-align:center;color:var(--slate-500);">
+            <div style="font-weight:700;">Create a new game</div>
+            <p style="font-size:0.875rem;">Pick a grade, mode, and time limit.</p>
+            <button style="margin-top:0.75rem;padding:0.5rem 1.5rem;background:var(--blue);color:white;border-radius:var(--radius);font-weight:700;">New game</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Analytics Tab ===== -->
+      <div id="teacherAnalytics" style="display:none;">
+        <div class="analytics-grid">
+          <div class="analytics-card">
+            <h3>Accuracy by operation</h3>
+            <div class="bar-group">
+              <div class="bar-item"><div class="row"><span class="label">Addition</span><span class="value">91%</span></div><div class="track"><div class="fill" style="width:91%;background:#0a8f4a;"></div></div></div>
+              <div class="bar-item"><div class="row"><span class="label">Subtraction</span><span class="value">84%</span></div><div class="track"><div class="fill" style="width:84%;background:var(--blue);"></div></div></div>
+              <div class="bar-item"><div class="row"><span class="label">Multiplication</span><span class="value">76%</span></div><div class="track"><div class="fill" style="width:76%;background:var(--yellow);"></div></div></div>
+              <div class="bar-item"><div class="row"><span class="label">Division</span><span class="value">68%</span></div><div class="track"><div class="fill" style="width:68%;background:var(--red);"></div></div></div>
+            </div>
+          </div>
+          <div class="analytics-card">
+            <h3>Games this week</h3>
+            <div class="week-chart">
+              <div class="bar"><div class="col" style="height:32%;"></div><span class="day">M</span></div>
+              <div class="bar"><div class="col" style="height:56%;"></div><span class="day">T</span></div>
+              <div class="bar"><div class="col" style="height:44%;"></div><span class="day">W</span></div>
+              <div class="bar"><div class="col" style="height:72%;"></div><span class="day">T</span></div>
+              <div class="bar"><div class="col" style="height:88%;"></div><span class="day">F</span></div>
+              <div class="bar"><div class="col" style="height:24%;"></div><span class="day">S</span></div>
+              <div class="bar"><div class="col" style="height:48%;"></div><span class="day">S</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container">
+      <div class="footer-style">
+        <div class="logo-icon">←∑→</div>
+        <span>© 2026 Math Tug-of-War</span>
+      </div>
+      <div class="links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Support</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/frontend/index.js"></script>
+  <script src="/frontend/pages/TeacherDashboard.js"></script>
+</body>
+</html>

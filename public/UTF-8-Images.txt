@@ -1,0 +1,39 @@
+//The Header Responsive Design
+Bar = &#9776
+
+//The Play Page
+Video Game = &#127918
+
+//The Game Mode Page
+Robot = &#129302
+Swords = &#129359
+People = &#128107
+
+//The Student Dashboard Animals
+fox = &#129418
+tiger = &#128047
+panda = &#128060
+monkey = &#128053
+lion = &#129409
+koala = &#128040
+frog = &#128056
+rabbit = &#128048
+fish = &#128025
+unicorn = &#129412
+bear = &#128059
+penguin = &#128039
+
+Fire = &#128293
+Lock = &#128274
+Target = &#127919
+Crown = &#128081
+
+//The Home Page
+Eyes = &#128064
+Lighting Bolt = &#128640
+Trophy = &#127942
+Numbers = &#120812 , &#120813 , &#120814 , &#120815 , &#120816 , &#120817 , &#120818 , &#120819 , &#120820 , &#120821 
+Add = &#10133
+Subtract = &#10134
+Divide = &#10135
+Sparkles = &#10024
