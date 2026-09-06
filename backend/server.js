@@ -53,7 +53,7 @@ const questionService = require('./src/services/QuestionService');
 const scoringService = require('./src/services/ScoringService');
 
 io.on('connection', (socket) => {
-    console.log(`🟢 Client connected: ${socket.id}`);
+    console.log(` Client connected: ${socket.id}`);
     let currentSessionId = null;
 
     socket.on('startSession', async (data) => {
@@ -96,7 +96,6 @@ io.on('connection', (socket) => {
                 return;
             }
 
-            // ✅ Coerce to Number so string payloads from Unity still match
             const isCorrect = Number(answer) === Number(session.currentQuestion?.answer);
             const responseTime = data.responseTime || 1000;
 
@@ -119,7 +118,7 @@ io.on('connection', (socket) => {
                 session.level = levelUpResult.newLevel;
             }
 
-            // Only keep adjusting difficulty while the game is still going
+            
             if (!session.isGameOver) {
                 session.adjustDifficulty();
             }
@@ -145,7 +144,7 @@ io.on('connection', (socket) => {
                 gameOverReason: session.gameOverReason
             });
 
-            // ✅ Don't deal another question once the match is over
+            
             if (!session.isGameOver) {
                 sendQuestion(socket, session);
             }
@@ -202,7 +201,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        console.log(`🔴 Client disconnected: ${socket.id}`);
+        console.log(`Client disconnected: ${socket.id}`);
     });
 
     function sendQuestion(socket, session) {
@@ -243,10 +242,10 @@ app.use((err, req, res, next) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`🚀 Math Tug-of-War Backend Server is running on port ${PORT}`);
-    console.log(`📡 REST API available at http://localhost:${PORT}/api`);
-    console.log(`💚 Health check at http://localhost:${PORT}/health`);
-    console.log(`🔌 Socket.IO server is ready`);
-    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`⏰ Started at: ${new Date().toISOString()}`);
+    console.log(`Math Tug-of-War Backend Server is running on port ${PORT}`);
+    console.log(`REST API available at http://localhost:${PORT}/api`);
+    console.log(`Health check at http://localhost:${PORT}/health`);
+    console.log(`Socket.IO server is ready`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`Started at: ${new Date().toISOString()}`);
 });
