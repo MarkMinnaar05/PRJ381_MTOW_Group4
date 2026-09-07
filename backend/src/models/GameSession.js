@@ -1,157 +1,127 @@
-// src/models/GameSession.js
-const { v4: uuidv4 } = require('uuid');
 
 class GameSession {
-    constructor(playerName = 'Player', initialDifficulty = 1) {
-        this.sessionId = uuidv4();
-        this.playerName = playerName;
+    constructor(roomId, hostId, hostName, initialDifficulty = 1) {
+        this.roomId = roomId;
         this.createdAt = new Date();
-        this.lastActivityAt = new Date();
         this.isActive = true;
-        this.score = 0;
-        this.xp = 0;
-        this.level = 1;
-        this.levelThreshold = 100;
-        this.streak = 0;
-        this.bestStreak = 0;
-        this.ropePosition = 0;
-        this.totalQuestions = 0;
-        this.correctAnswers = 0;
-        this.incorrectAnswers = 0;
-        this.accuracy = 0;
         this.difficulty = initialDifficulty;
-        this.maxDifficulty = 5;
-        this.minDifficulty = 1;
-        this.totalResponseTime = 0;
-        this.averageResponseTime = 0;
-        this.questionsHistory = [];
-        this.currentQuestion = null;
-        this.badges = [];
 
-        // ✅ Game-over state
-        this.isGameOver = false;
-        this.playerWon = null;
-        this.gameOverReason = null;
-        this.winThreshold = 1;
-    }
-
-    updateStats(isCorrect, responseTime, scoreEarned, xpEarned) {
-        this.totalQuestions++;
-        this.lastActivityAt = new Date();
-        
-        if (isCorrect) {
-            this.streak++;
-            if (this.streak > this.bestStreak) {
-                this.bestStreak = this.streak;
+        // Multiplayer State
+        this.players = {
+            [hostId]: {
+                id: hostId,
+                name: hostName,
+                score: 0,
+                xp: 0,
+                level: 1,
+                streak: 0,
+                side: 1 
             }
-            this.ropePosition += 0.1;
-        } else {
-            this.streak = 0;
-            this.ropePosition -= 0.1;
-        }
-        this.ropePosition = Math.max(-1, Math.min(1, this.ropePosition));
-        
-        this.score += scoreEarned;
-        this.xp += xpEarned;
-        
-        if (isCorrect) {
-            this.correctAnswers++;
-        } else {
-            this.incorrectAnswers++;
-        }
-        this.accuracy = this.totalQuestions > 0 
-            ? (this.correctAnswers / this.totalQuestions) * 100 
-            : 0;
-        
-        if (responseTime > 0) {
-            this.totalResponseTime += responseTime;
-            this.averageResponseTime = this.totalResponseTime / this.totalQuestions;
-        }
-        
-        this.questionsHistory.push({
-            isCorrect,
-            difficulty: this.difficulty,
-            responseTime
-        });
-        if (this.questionsHistory.length > 20) {
-            this.questionsHistory.shift();
-        }
+        };
+        this.hostId = hostId;
 
-        // ✅ Check for win/loss after rope position updates
-        this.checkGameOver();
-        
-        return this.checkLevelUp();
+        // Shared Game State
+        this.ropePosition = 0;
+        this.winThreshold = 1.0;
+        this.currentQuestion = null;
+        this.totalQuestions = 0;
+        this.isGameOver = false;
+        this.winner = null;
+        this.gameOverReason = null;
     }
 
-    // ✅ NEW: Determine if the rope has hit either end
-    checkGameOver() {
+    addPlayer(playerId, playerName) {
+        if (Object.keys(this.players).length >= 2) {
+            return false; 
+        }
+        this.players[playerId] = {
+            id: playerId,
+            name: playerName,
+            score: 0,
+            xp: 0,
+            level: 1,
+            streak: 0,
+            side: -1 
+        };
+        return true;
+    }
+
+    removePlayer(playerId) {
+        delete this.players[playerId];
+
+        if (playerId === this.hostId) {
+            const remaining = Object.keys(this.players);
+            this.hostId = remaining.length > 0 ? remaining[0] : null;
+        }
+
+        if (Object.keys(this.players).length === 0) {
+            this.isActive = false;
+        }
+    }
+
+    processAnswer(playerId, isCorrect, scoreEarned, xpEarned) {
         if (this.isGameOver) return;
 
+        const player = this.players[playerId];
+        if (!player) return;
+
+        this.totalQuestions++;
+
+        if (isCorrect) {
+            player.streak++;
+            player.score += scoreEarned;
+            player.xp += xpEarned;
+            this.ropePosition += (0.1 * player.side);
+        } else {
+            player.streak = 0;
+            this.ropePosition -= (0.1 * player.side);
+        }
+
+        this.ropePosition = Math.max(-1, Math.min(1, this.ropePosition));
+        this.checkGameOver();
+    }
+
+    // Was missing entirely — this is what server.js's submit_answer handler
+    // calls after every processAnswer(). Any streak of 3+ from either
+    // player bumps difficulty up; a cold streak (no one's answered
+    // correctly in the last 5 questions) eases it back down.
+    adjustDifficulty() {
+        const streaks = Object.values(this.players).map(p => p.streak);
+        const maxStreak = streaks.length > 0 ? Math.max(...streaks) : 0;
+
+        if (maxStreak >= 3 && this.difficulty < 5) {
+            this.difficulty++;
+        } else if (maxStreak === 0 && this.difficulty > 1 && this.totalQuestions % 5 === 0) {
+            this.difficulty--;
+        }
+    }
+
+    checkGameOver() {
         if (this.ropePosition >= this.winThreshold) {
             this.isGameOver = true;
-            this.playerWon = true;
-            this.gameOverReason = 'rope_reached_player_side';
-            this.isActive = false;
+            this.winner = this.getSideOwner(1);
+            this.gameOverReason = 'rope_reached_host_side';
         } else if (this.ropePosition <= -this.winThreshold) {
             this.isGameOver = true;
-            this.playerWon = false;
-            this.gameOverReason = 'rope_reached_opponent_side';
-            this.isActive = false;
+            this.winner = this.getSideOwner(-1);
+            this.gameOverReason = 'rope_reached_guest_side';
         }
     }
 
-    checkLevelUp() {
-        let leveledUp = false;
-        while (this.xp >= this.levelThreshold) {
-            this.level++;
-            this.levelThreshold = Math.floor(this.levelThreshold * 1.5);
-            leveledUp = true;
-        }
-        return leveledUp;
-    }
-
-    adjustDifficulty() {
-        const recentQuestions = this.questionsHistory.slice(-10);
-        if (recentQuestions.length < 5) {
-            return this.difficulty;
-        }
-        
-        const correctCount = recentQuestions.filter(q => q.isCorrect).length;
-        const recentAccuracy = correctCount / recentQuestions.length;
-        
-        if (recentAccuracy > 0.8) {
-            this.difficulty = Math.min(this.difficulty + 1, this.maxDifficulty);
-        } else if (recentAccuracy < 0.5) {
-            this.difficulty = Math.max(this.difficulty - 1, this.minDifficulty);
-        }
-        
-        return this.difficulty;
+    getSideOwner(sideValue) {
+        return Object.values(this.players).find(p => p.side === sideValue) || null;
     }
 
     getSummary() {
         return {
-            sessionId: this.sessionId,
-            playerName: this.playerName,
-            score: this.score,
-            xp: this.xp,
-            level: this.level,
-            levelThreshold: this.levelThreshold,
-            streak: this.streak,
-            bestStreak: this.bestStreak,
-            totalQuestions: this.totalQuestions,
-            correctAnswers: this.correctAnswers,
-            incorrectAnswers: this.incorrectAnswers,
-            accuracy: Math.round(this.accuracy * 100) / 100,
-            difficulty: this.difficulty,
-            averageResponseTime: Math.round(this.averageResponseTime),
-            badges: this.badges,
-            isActive: this.isActive,
-            createdAt: this.createdAt,
-            lastActivityAt: this.lastActivityAt,
+            roomId: this.roomId,
             ropePosition: this.ropePosition,
+            currentQuestion: this.currentQuestion,
+            players: Object.values(this.players),
             isGameOver: this.isGameOver,
-            playerWon: this.playerWon,
-            gameOverReason: this.gameOverReason
+            winner: this.winner,
+            gameOverReason: this.gameOverReason,
+            totalQuestions: this.totalQuestions
         };
     }
 }

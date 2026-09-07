@@ -1,8 +1,8 @@
-// src/services/ScoringService.js
+
 class ScoringService {
     constructor() {
-        this.SCORE_PER_CORRECT = 10; // ✅ flat score per correct answer
-        this.XP_PER_CORRECT = 10;    // ✅ flat XP per correct answer
+        this.SCORE_PER_CORRECT = 10;
+        this.XP_PER_CORRECT = 10;    
         this.LEVEL_XP_BASE = 100;
         this.LEVEL_XP_MULTIPLIER = 1.5;
     }
@@ -21,8 +21,7 @@ class ScoringService {
             };
         }
 
-        // ✅ Both score and XP are flat for every correct answer —
-        // no speed, streak, or difficulty bonuses applied.
+       
         return {
             scoreEarned: this.SCORE_PER_CORRECT,
             xpEarned: this.XP_PER_CORRECT,

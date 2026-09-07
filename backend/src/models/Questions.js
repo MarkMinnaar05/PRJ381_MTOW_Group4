@@ -1,5 +1,4 @@
-// src/models/Questions.js
-// Question Model and Generator
+
 
 class Question {
     constructor(operand1, operand2, operation, difficulty) {
@@ -26,9 +25,9 @@ class Question {
         return `${this.operand1} ${this.operation} ${this.operand2}`;
     }
 
-    // ✅ IMPORTANT: This must be a STATIC method
+    
     static generate(difficulty = 1, operations = ['+', '-', '×', '÷']) {
-        // ✅ Every operand, for every operation, is capped at 12.
+        
         const MAX_OPERAND = 12;
 
         const operation = operations[Math.floor(Math.random() * operations.length)];
@@ -42,15 +41,14 @@ class Question {
                 break;
             case '-':
                 operand1 = Question.randomInt(1, MAX_OPERAND);
-                operand2 = Question.randomInt(1, operand1); // keeps result non-negative
+                operand2 = Question.randomInt(1, operand1); 
                 break;
             case '×':
                 operand1 = Question.randomInt(1, MAX_OPERAND);
                 operand2 = Question.randomInt(1, MAX_OPERAND);
                 break;
             case '÷': {
-                // ✅ Divisor capped at 12, and quotient is chosen so the
-                // dividend (operand1) also never exceeds 12.
+              
                 operand2 = Question.randomInt(1, MAX_OPERAND);
                 const maxQuotient = Math.floor(MAX_OPERAND / operand2);
                 const quotient = Question.randomInt(1, maxQuotient);

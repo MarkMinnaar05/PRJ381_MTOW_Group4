@@ -1,4 +1,4 @@
-// src/controllers/SessionController.js
+
 const { GameSession, sessions } = require('../models/GameSession');
 const questionService = require('../services/QuestionService');
 

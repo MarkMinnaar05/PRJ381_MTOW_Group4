@@ -1,7 +1,4 @@
-// src/services/QuestionService.js
-// Question Generation Service
 
-// ✅ CORRECT: Requires the Question class
 const Question = require('../models/Questions');
 
 class QuestionService {
@@ -21,7 +18,7 @@ class QuestionService {
             }
         }
         
-        // ✅ This calls the STATIC method generate
+    
         const question = Question.generate(difficulty, operations);
         
         if (useCache) {
