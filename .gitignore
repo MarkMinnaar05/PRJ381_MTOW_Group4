@@ -97,4 +97,14 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# Node / backend
+node_modules/
+backend/data/
+backend/public/
+
+# Unity WebGL build output
+/WebGL
 /package-lock
+
+node_modules
