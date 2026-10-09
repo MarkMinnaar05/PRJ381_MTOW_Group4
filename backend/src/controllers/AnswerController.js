@@ -1,4 +1,3 @@
-// src/controllers/AnswerController.js
 const { sessions } = require('../models/GameSession');
 const scoringService = require('../services/ScoringService');
 
@@ -76,7 +75,6 @@ exports.submitAnswer = async (req, res) => {
             scoreResult.xpEarned
         );
         
-        // Only keep adjusting difficulty while the game is still going
         if (!session.isGameOver) {
             session.adjustDifficulty();
         }

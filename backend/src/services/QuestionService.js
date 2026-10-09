@@ -1,6 +1,3 @@
-// src/services/QuestionService.js
-// Question Generation Service
-
 
 const Question = require('../models/Questions');
 
@@ -21,18 +18,12 @@ class QuestionService {
             }
         }
         
-     
-        const question = Question.generate(difficulty, operations);
-        
-        if (useCache) {
-            const cacheKey = this.getCacheKey(difficulty, operations);
-            if (!this.questionCache.has(cacheKey)) {
-                this.questionCache.set(cacheKey, []);
-            }
-            this.questionCache.get(cacheKey).push(question);
-        }
-        
-        return question;
+    
+        // Cache miss: hand back a fresh question. It must NOT also be pushed into
+        // the cache - the next call would pop and return the very same question
+        // again (players saw a repeat right after answering correctly). The cache
+        // is only filled by preCacheQuestions().
+        return Question.generate(difficulty, operations);
     }
 
     getBatchQuestions(count = 5, difficulty = 1, operations = ['+', '-', '×', '÷']) {

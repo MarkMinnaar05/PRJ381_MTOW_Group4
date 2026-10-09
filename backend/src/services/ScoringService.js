@@ -1,7 +1,7 @@
-// src/services/ScoringService.js
+
 class ScoringService {
     constructor() {
-        this.SCORE_PER_CORRECT = 10; 
+        this.SCORE_PER_CORRECT = 10;
         this.XP_PER_CORRECT = 10;    
         this.LEVEL_XP_BASE = 100;
         this.LEVEL_XP_MULTIPLIER = 1.5;
@@ -21,7 +21,7 @@ class ScoringService {
             };
         }
 
-        
+       
         return {
             scoreEarned: this.SCORE_PER_CORRECT,
             xpEarned: this.XP_PER_CORRECT,
