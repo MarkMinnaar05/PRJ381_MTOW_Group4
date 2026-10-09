@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Math Tug-of-War — My Progress</title>
+  <link rel="stylesheet" href="/frontend/styles/main.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="logo">
+      <div class="logo-icon"><span><span class="r">←</span><span class="s">∑</span><span class="b">→</span></span></div>
+      <span class="logo-text">Math <span class="red">Tug</span><span class="yellow">-of-</span><span class="blue">War</span></span>
+    </div>
+    <nav class="nav-links">
+      <a href="/frontend/index.html">Home</a>
+      <a href="/frontend/pages/Play.html">Play</a>
+      <a href="/frontend/pages/GameModes.html">Modes</a>
+      <a href="/frontend/pages/Leaderboard.html">Leaderboard</a>
+      <a href="/frontend/pages/StudentDashboard.html" class="active student-link">My progress</a>
+      <a href="/frontend/pages/TeacherDashboard.html" class="teacher-link" style="display:none;">Teacher</a>
+    </nav>
+    <a href="javascript:void(0);" class="icon" onclick="myFunction()">&#9776;</a>
+    <div class="header-actions">
+      <div class="user-badge" id="userBadge" style="display:none;">
+        <span class="avatar" id="headerAvatar"></span>
+        <span class="name" id="headerName">Player</span>
+      </div>
+      <a href="/frontend/pages/Auth.html" class="btn-signin" id="signInBtn">Sign in</a>
+      <a href="javascript:void(0);" class="btn-signout" id="signOutBtn" style="display:none;">Sign out</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="studentboard-header">
+        <div>
+          <span>Student</span>
+          <h1>My dashboard</h1>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="dashboard-profile">
+
+        <div class="profile-card">
+          <div style="font-size:4rem;" id="dashAvatar"></div>
+          <input type="text" value="Player" id="dashName" />
+          <div class="avatar-picker">
+            <button data-avatar="&#129418;">&#129418;</button>
+            <button data-avatar="&#128047;">&#128047;</button>
+            <button data-avatar="&#128060;">&#128060;</button>
+            <button data-avatar="&#128053;">&#128053;</button>
+            <button data-avatar="&#129409;">&#129409;</button>
+            <button data-avatar="&#128040;">&#128040;</button>
+            <button data-avatar="&#128056;">&#128056;</button>
+            <button data-avatar="&#128048;">&#128048;</button>
+            <button data-avatar="&#128025;">&#128025;</button>
+            <button data-avatar="&#129412;">&#129412;</button>
+            <button data-avatar="&#128059;">&#128059;</button>
+            <button data-avatar="&#128039;">&#128039;</button>
+          </div>
+          <div class="class-input">
+            <label>Class code</label>
+            <input type="text" value="SUN-3B" />
+          </div>
+        </div>
+
+        <div class="stats-card">
+          <div class="top">
+            <div>
+              <div class="level-badge">Level 3</div>
+              <div class="xp-display">1,280 <span>XP</span></div>
+              <div class="xp-to-next">720 XP to level 4</div>
+            </div>
+          </div>
+          <div class="xp-bar"><div class="fill" style="width:40%;"></div></div>
+          <div class="stats-grid">
+            <div class="stat-item"><div class="label">Games played</div><div class="value" style="color:var(--blue);">42</div></div>
+            <div class="stat-item"><div class="label">Wins</div><div class="value" style="color:#0a8f4a;">28</div></div>
+            <div class="stat-item"><div class="label">Win rate</div><div class="value" style="color:var(--yellow);">67%</div></div>
+            <div class="stat-item"><div class="label">Day streak</div><div class="value" style="color:var(--red);">8</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress by Grade -->
+      <h2 style="font-size:1.5rem;font-weight:900;margin-top:2rem;">Progress by grade</h2>
+      <div class="grade-cards">
+        <div class="grade-card">
+          <div class="header"><span class="grade-badge">Grade 1</span><span class="wins">5</span></div>
+          <div class="row"><span>Correct</span><span class="bold">48</span></div>
+          <div class="row"><span>Missed</span><span class="bold">12</span></div>
+          <div class="row"><span>Accuracy</span><span class="bold">80%</span></div>
+          <div class="acc-bar"><div class="fill" style="width:80%;"></div></div>
+        </div>
+        <div class="grade-card">
+          <div class="header"><span class="grade-badge">Grade 2</span><span class="wins">12</span></div>
+          <div class="row"><span>Correct</span><span class="bold">120</span></div>
+          <div class="row"><span>Missed</span><span class="bold">30</span></div>
+          <div class="row"><span>Accuracy</span><span class="bold">80%</span></div>
+          <div class="acc-bar"><div class="fill" style="width:80%;"></div></div>
+        </div>
+        <div class="grade-card">
+          <div class="header"><span class="grade-badge">Grade 3</span><span class="wins">11</span></div>
+          <div class="row"><span>Correct</span><span class="bold">95</span></div>
+          <div class="row"><span>Missed</span><span class="bold">28</span></div>
+          <div class="row"><span>Accuracy</span><span class="bold">77%</span></div>
+          <div class="acc-bar"><div class="fill" style="width:77%;"></div></div>
+        </div>
+      </div>
+
+      <!-- Achievements -->
+      <h2 style="font-size:1.5rem;font-weight:900;margin-top:2rem;">Achievements</h2>
+      <p style="color:var(--slate-500);">4 of 8 unlocked</p>
+      <div class="achievements-grid">
+        <div class="achievement-card unlocked"><div class="icon">&#127942;</div><div class="title">First Pull</div><div class="desc">Win your first battle</div></div>
+        <div class="achievement-card unlocked"><div class="icon">&#128293;</div><div class="title">On Fire</div><div class="desc">Get a 5-answer streak</div></div>
+        <div class="achievement-card locked"><div class="icon">&#128274;</div><div class="title">Unstoppable</div><div class="desc">Get a 10-answer streak</div></div>
+        <div class="achievement-card unlocked"><div class="icon">&#127919;</div><div class="title">Half Century</div><div class="desc">Answer 50 questions correctly</div></div>
+        <div class="achievement-card locked"><div class="icon">&#128274;</div><div class="title">Math Wizard</div><div class="desc">Answer 200 questions correctly</div></div>
+        <div class="achievement-card unlocked"><div class="icon">&#128081;</div><div class="title">Champion</div><div class="desc">Win 10 battles</div></div>
+        <div class="achievement-card locked"><div class="icon">&#128274;</div><div class="title">Level 5</div><div class="desc">Reach player level 5</div></div>
+        <div class="achievement-card locked"><div class="icon">&#128274;</div><div class="title">Grade 1 Master</div><div class="desc">Win 5 Grade 1 battles</div></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container">
+      <div class="footer-style">
+        <div class="logo-icon">←∑→</div>
+        <span>© 2026 Math Tug-of-War</span>
+      </div>
+      <div class="links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Support</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/frontend/index.js"></script>
+  <script src="/frontend/pages/StudentDashboard.js"></script>
+</body>
+</html>

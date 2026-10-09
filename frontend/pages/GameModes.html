@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Math Tug-of-War — Game Modes</title>
+  <link rel="stylesheet" href="/frontend/styles/main.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="logo">
+      <div class="logo-icon"><span><span class="r">←</span><span class="s">∑</span><span class="b">→</span></span></div>
+      <span class="logo-text">Math <span class="red">Tug</span><span class="yellow">-of-</span><span class="blue">War</span></span>
+    </div>
+    <nav class="nav-links">
+      <a href="/frontend/index.html">Home</a>
+      <a href="/frontend/pages/Play.html">Play</a>
+      <a href="/frontend/pages/GameModes.html" class="active">Modes</a>
+      <a href="/frontend/pages/Leaderboard.html">Leaderboard</a>
+      <a href="/frontend/pages/StudentDashboard.html" class="student-link">My progress</a>
+      <a href="/frontend/pages/TeacherDashboard.html" class="teacher-link" style="display:none;">Teacher</a>
+    </nav>
+    <a href="javascript:void(0);" class="icon" onclick="myFunction()">&#9776;</a>
+    <div class="header-actions">
+      <div class="user-badge" id="userBadge">
+        <span class="avatar" id="headerAvatar"></span>
+        <span class="name" id="headerName">Player</span>
+      </div>
+      <a href="/frontend/pages/Auth.html" class="btn-signin" id="signInBtn">Sign in</a>
+      <a href="javascript:void(0);" class="btn-signout" id="signOutBtn" style="display:none;">Sign out</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="modes-header">
+        <div>
+          <span>Choose your battle</span>
+          <h1>Game Modes</h1>
+          <p>Solo drills, live duels, class tournaments, rooms sync across devices with your Math Tug-of-War account.</p>
+        </div>
+        <div class="join-box">
+          <label>Join with a code</label>
+          <div class="input-group">
+            <input type="text" placeholder="1234"/>
+            <button id="join-btn">Join</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modes-grid">
+
+        <!-- Solo vs CPU -->
+        <div class="mode-card">
+          <div class="icon-bg" style="background:var(--red);"></div>
+          <div class="header">
+            <span class="emoji">&#129302;</span>  
+            <div><div class="title">Solo vs Computer</div><div class="sub">Warm up on your own</div></div>
+          </div>
+          <div class="players" style="background:var(--red);">1 player</div>
+          <ul>
+            <li><span class="dot" style="background:var(--red);"></span>Adaptive CPU speed</li>
+            <li><span class="dot" style="background:var(--red);"></span>Choose your grade & operation</li>
+            <li><span class="dot" style="background:var(--red);"></span>Great for practice</li>
+          </ul>
+          <button class="btn-mode" style="background:var(--red);" id="soloBtn">Play now</button>
+        </div>
+
+        <!-- 1 vs 1 Duel -->
+        <div class="mode-card">
+          <div class="icon-bg" style="background:var(--blue);"></div>
+          <div class="header">
+            <span class="emoji">&#129359;</span> 
+            <div><div class="title">1 vs 1 Duel</div><div class="sub">Head to head speed match</div></div>
+          </div>
+          <div class="players" style="background:var(--blue);">2 players</div>
+          <ul>
+            <li><span class="dot" style="background:var(--blue);"></span>Match by grade level</li>
+            <li><span class="dot" style="background:var(--blue);"></span>Best rope wins</li>
+            <li><span class="dot" style="background:var(--blue);"></span>Rematch instantly</li>
+          </ul>
+          <button class="btn-mode" style="background:var(--blue);" id="duelBtn">Create duel</button>
+        </div>
+
+        <!-- Team Battle -->
+        <div class="mode-card">
+          <div class="icon-bg" style="background:var(--yellow);"></div>
+          <div class="header">
+            <span class="emoji">&#128107;</span> 
+            <div><div class="title">Team Battle</div><div class="sub">Rope pulled by combined answers</div></div>
+          </div>
+          <div class="players" style="background:var(--yellow);">3–5 per team</div>
+          <ul>
+            <li><span class="dot" style="background:var(--yellow);"></span>Red team vs Blue team</li>
+            <li><span class="dot" style="background:var(--yellow);"></span>Shared streak bonuses</li>
+            <li><span class="dot" style="background:var(--yellow);"></span>Fastest Team Wins</li>
+          </ul>
+          <button class="btn-mode" style="background:var(--yellow);" id="teamBtn">Create team</button>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container">
+      <div class="footer-style">
+        <div class="logo-icon">←∑→</div>
+        <span>© 2026 Math Tug-of-War</span>
+      </div>
+      <div class="links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Support</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/frontend/index.js"></script>
+  <script src="/frontend/pages/GameModes.js"></script>
+</body>
+</html>

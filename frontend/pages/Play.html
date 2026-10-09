@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Math Tug-of-War — Play</title>
+  <link rel="stylesheet" href="/frontend/styles/main.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="logo">
+      <div class="logo-icon"><span><span class="r">←</span><span class="s">∑</span><span class="b">→</span></span></div>
+      <span class="logo-text">Math <span class="red">Tug</span><span class="yellow">-of-</span><span class="blue">War</span></span>
+    </div>
+    <nav class="nav-links">
+      <a href="/frontend/index.html">Home</a>
+      <a href="/frontend/pages/Play.html" class="active">Play</a>
+      <a href="/frontend/pages/GameModes.html">Modes</a>
+      <a href="/frontend/pages/Leaderboard.html">Leaderboard</a>
+      <a href="/frontend/pages/StudentDashboard.html" class="student-link">My progress</a>
+      <a href="/frontend/pages/TeacherDashboard.html" class="teacher-link" style="display:none;">Teacher</a>
+    </nav>
+    <a href="javascript:void(0);" class="icon" onclick="myFunction()">&#9776;</a>
+    <div class="header-actions">
+      <div class="user-badge" id="userBadge" style="display:none;">
+        <span class="avatar" id="headerAvatar"></span>
+        <span class="name" id="headerName">Player</span>
+      </div>
+      <a href="/frontend/pages/Auth.html" class="btn-signin" id="signInBtn">Sign in</a>
+      <a href="javascript:void(0);" class="btn-signout" id="signOutBtn" style="display:none;">Sign out</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="play-placeholder">
+        <div class="icon">&#127918;</div> 
+        <h2>Game Area</h2>
+        <p>This is where the full Tug-of-War game will be inserted. The game logic, rope mechanics, and real-time battles will be added by the game developer.</p>
+        <!-- GAME CONTAINER -->
+        <div>(Placeholder for now — ready for the real game!)</div>
+        <button class="btn-start" id="gameDemoBtn">Start battle</button>
+      </div>
+    </div>
+  </main>
+
+  <footer class="app-footer">
+    <div class="container">
+      <div class="footer-style">
+        <div class="logo-icon">←∑→</div>
+        <span>© 2026 Math Tug-of-War</span>
+      </div>
+      <div class="links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Support</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/frontend/index.js"></script>
+  <script src="/frontend/pages/Play.js"></script>
+</body>
+</html>
