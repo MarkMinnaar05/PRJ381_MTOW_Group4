@@ -100,8 +100,8 @@ InitTestScene*.unity*
 
 # Node / backend
 node_modules/
-package.json
-package-lock.json
+backend/data/
+backend/public/
 
 # Unity WebGL build output
 /WebGL

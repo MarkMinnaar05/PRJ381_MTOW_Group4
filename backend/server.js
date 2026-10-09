@@ -3,16 +3,19 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
+const path = require('path');
 
 const { GameSession, sessions } = require('./src/models/GameSession');
 const questionService = require('./src/services/QuestionService');
 const scoringService = require('./src/services/ScoringService');
 const { Matchmaker } = require('./src/services/Matchmaker');
+const { registerMtow } = require('./src/mtow/registerMtow');
 
 const app = express();
 app.use(cors());
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
+registerMtow(io);
 
 const PORT = process.env.PORT || 3000;
 
@@ -25,17 +28,6 @@ function generateRoomCode() {
     return code;
 }
 
-// ---------------------------------------------------------------------------
-// Automatic matchmaking. A player hits Play on the website, the client emits
-// `find_match`, and the server pairs them with the longest-waiting classmate
-// in the same class + mode. No room codes involved (the create_room /
-// join_room / start_game events below still work but the game no longer uses
-// them).
-//
-// NOTE: identity (name / classId / playerId) is taken from the client for now.
-// Once accounts exist this is where a login token gets verified and classId is
-// read from the student's record instead of trusted from the request.
-// ---------------------------------------------------------------------------
 const matchmaker = new Matchmaker();
 const MATCH_DIFFICULTY = 2;
 
@@ -67,7 +59,7 @@ function createMatchSession(a, b) {
     for (const entry of [a, b]) {
         const s = io.sockets.sockets.get(entry.socketId);
         s.join(roomId);
-        // Sent per-socket (not to the room) so each client is told which player it is.
+        
         s.emit('match_found', JSON.stringify({
             success: true,
             roomId: roomId,
@@ -78,9 +70,6 @@ function createMatchSession(a, b) {
     }
     console.log(`Match ${roomId} (${a.classId}/${a.mode}): ${a.name} vs ${b.name}`);
 }
-
-// A player left an auto-matched game that was still running: the one who is
-// still here wins, and the room is torn down.
 function endMatchOpponentLeft(roomId, session, leaverId) {
     const remaining = Object.values(session.players).find(p => p.id !== leaverId) || null;
     session.isGameOver = true;
@@ -104,7 +93,7 @@ io.on('connection', (socket) => {
             const entry = { socketId: socket.id, ...info };
 
             let result = matchmaker.enqueue(entry);
-            // A queued opponent whose socket vanished a moment ago: skip to the next.
+            
             while (result.match && !io.sockets.sockets.get(result.match.socketId)) {
                 result = matchmaker.enqueue(entry);
             }
@@ -292,6 +281,7 @@ io.on('connection', (socket) => {
     });
 });
 
+app.use(express.static(path.join(__dirname, 'public')));
 app.use((req, res) => {
     res.status(404).json({ success: false, error: 'Route not found' });
 });
