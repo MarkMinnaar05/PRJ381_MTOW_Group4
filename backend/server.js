@@ -7,6 +7,7 @@ const cors = require('cors');
 const { GameSession, sessions } = require('./src/models/GameSession');
 const questionService = require('./src/services/QuestionService');
 const scoringService = require('./src/services/ScoringService');
+const { Matchmaker } = require('./src/services/Matchmaker');
 
 const app = express();
 app.use(cors());
@@ -24,10 +25,118 @@ function generateRoomCode() {
     return code;
 }
 
+// ---------------------------------------------------------------------------
+// Automatic matchmaking. A player hits Play on the website, the client emits
+// `find_match`, and the server pairs them with the longest-waiting classmate
+// in the same class + mode. No room codes involved (the create_room /
+// join_room / start_game events below still work but the game no longer uses
+// them).
+//
+// NOTE: identity (name / classId / playerId) is taken from the client for now.
+// Once accounts exist this is where a login token gets verified and classId is
+// read from the student's record instead of trusted from the request.
+// ---------------------------------------------------------------------------
+const matchmaker = new Matchmaker();
+const MATCH_DIFFICULTY = 2;
+
+function cleanString(value, fallback, max) {
+    const s = typeof value === 'string' ? value.trim() : '';
+    return (s || fallback).slice(0, max);
+}
+
+function parseFindMatch(data) {
+    const raw = typeof data === 'string' ? JSON.parse(data || '{}') : (data || {});
+    return {
+        playerId: raw.playerId ? cleanString(String(raw.playerId), '', 64) : undefined,
+        name: cleanString(raw.name ?? raw.playerName, 'Player', 24),
+        classId: cleanString(raw.classId ?? raw.class, 'PUBLIC', 32).toUpperCase(),
+        mode: cleanString(raw.mode, 'classic', 24).toLowerCase()
+    };
+}
+
+function createMatchSession(a, b) {
+    const roomId = generateRoomCode();
+    const session = new GameSession(roomId, a.socketId, a.name, MATCH_DIFFICULTY);
+    session.addPlayer(b.socketId, b.name);
+    session.currentQuestion = questionService.getQuestion(session.difficulty).toJSON();
+    session.autoMatched = true;
+    session.classId = a.classId;
+    session.mode = a.mode;
+    sessions.set(roomId, session);
+
+    for (const entry of [a, b]) {
+        const s = io.sockets.sockets.get(entry.socketId);
+        s.join(roomId);
+        // Sent per-socket (not to the room) so each client is told which player it is.
+        s.emit('match_found', JSON.stringify({
+            success: true,
+            roomId: roomId,
+            youId: entry.socketId,
+            youSide: session.players[entry.socketId].side,
+            gameState: session.getSummary()
+        }));
+    }
+    console.log(`Match ${roomId} (${a.classId}/${a.mode}): ${a.name} vs ${b.name}`);
+}
+
+// A player left an auto-matched game that was still running: the one who is
+// still here wins, and the room is torn down.
+function endMatchOpponentLeft(roomId, session, leaverId) {
+    const remaining = Object.values(session.players).find(p => p.id !== leaverId) || null;
+    session.isGameOver = true;
+    session.winner = remaining;
+    session.gameOverReason = 'opponent_left';
+    if (remaining) {
+        io.to(roomId).emit('game_over', JSON.stringify({
+            success: true,
+            gameState: session.getSummary()
+        }));
+    }
+    sessions.delete(roomId);
+}
+
 io.on('connection', (socket) => {
     console.log(`Client connected: ${socket.id}`);
 
-    
+    socket.on('find_match', (data) => {
+        try {
+            const info = parseFindMatch(data);
+            const entry = { socketId: socket.id, ...info };
+
+            let result = matchmaker.enqueue(entry);
+            // A queued opponent whose socket vanished a moment ago: skip to the next.
+            while (result.match && !io.sockets.sockets.get(result.match.socketId)) {
+                result = matchmaker.enqueue(entry);
+            }
+
+            if (result.replaced) {
+                const old = io.sockets.sockets.get(result.replaced.socketId);
+                if (old) old.emit('error_msg', 'You started a new game in another window.');
+            }
+
+            if (result.match) {
+                createMatchSession(result.match, entry);
+            } else {
+                socket.emit('queue_joined', JSON.stringify({
+                    success: true,
+                    classId: info.classId,
+                    mode: info.mode,
+                    waiting: matchmaker.size(info.classId, info.mode)
+                }));
+                console.log(`${info.name} queued (${info.classId}/${info.mode})`);
+            }
+        } catch (error) {
+            console.error('Error finding match:', error);
+            socket.emit('error_msg', 'Failed to find a match');
+        }
+    });
+
+    socket.on('cancel_match', () => {
+        if (matchmaker.remove(socket.id)) {
+            socket.emit('queue_left', JSON.stringify({ success: true }));
+        }
+    });
+
     socket.on('create_room', (data) => {
         try {
             const { playerName = 'Host', difficulty = 1 } = JSON.parse(data || '{}');
@@ -161,8 +270,13 @@ io.on('connection', (socket) => {
     
     socket.on('disconnect', () => {
         console.log(`Client disconnected: ${socket.id}`);
+        matchmaker.remove(socket.id);
         for (const [roomId, session] of sessions.entries()) {
             if (session.players && session.players[socket.id]) {
+                if (session.autoMatched && !session.isGameOver) {
+                    endMatchOpponentLeft(roomId, session, socket.id);
+                    break;
+                }
                 session.removePlayer(socket.id);
                 if (!session.isActive) {
                     sessions.delete(roomId);
