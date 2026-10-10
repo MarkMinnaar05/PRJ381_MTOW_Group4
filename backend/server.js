@@ -13,6 +13,10 @@ const { registerMtow } = require('./src/mtow/registerMtow');
 
 const app = express();
 app.use(cors());
+
+app.use(express.json());
+app.use('/api/analytics', require('./src/routes/analytics'));
+
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 registerMtow(io);
