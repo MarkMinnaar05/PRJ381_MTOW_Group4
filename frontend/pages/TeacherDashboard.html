@@ -50,12 +50,71 @@
         <button class="add">+ New class</button>
       </div>
 
-      <div class="metrics">
-        <div class="metric"><div class="label">Students</div><div class="value" style="color:var(--blue);">5</div></div>
-        <div class="metric"><div class="label">Online now</div><div class="value" style="color:#0a8f4a;">3</div></div>
-        <div class="metric"><div class="label">Avg accuracy</div><div class="value" style="color:var(--yellow);">85%</div></div>
-        <div class="metric"><div class="label">Avg XP</div><div class="value" style="color:var(--red);">3,966</div></div>
+       <div class="metrics">
+        <div class="metric">
+          <div class="label">
+            Students
+          </div>
+
+          <div
+            id="metricPlayers"
+            class="value"
+            style="color:var(--blue);"
+          >
+            —
+          </div>
+        </div>
+
+        <div class="metric">
+          <div class="label">
+            Completed games
+          </div>
+
+          <div
+            id="metricGames"
+            class="value"
+            style="color:#0a8f4a;"
+          >
+            —
+          </div>
+        </div>
+
+        <div class="metric">
+          <div class="label">
+            Avg accuracy
+          </div>
+
+          <div
+            id="metricAccuracy"
+            class="value"
+            style="color:var(--yellow);"
+          >
+            —
+          </div>
+        </div>
+
+        <div class="metric">
+          <div class="label">
+            Avg response
+          </div>
+
+          <div
+            id="metricResponse"
+            class="value"
+            style="color:var(--red);"
+          >
+            —
+          </div>
+        </div>
       </div>
+
+      <p
+        id="analyticsMessage"
+        role="status"
+        style="color:var(--slate-600); margin-bottom:1rem;"
+      >
+        Loading analytics…
+      </p>
 
       <div class="teacher-tabs">
         <button data-ttab="students">Students</button>
@@ -67,45 +126,26 @@
             <thead>
               <tr>
                 <th>Student</th>
-                <th>Status</th>
-                <th class="text-right">XP</th>
-                <th class="text-right">Wins</th>
-                <th class="text-right">Accuracy</th>
-                <th class="text-right">Streak</th>
+                <th>Performance</th>
+                <th class="text-right">
+                  High score
+                </th>
+                <th class="text-right">
+                  Wins
+                </th>
+                <th class="text-right">
+                  Accuracy
+                </th>
+                <th class="text-right">
+                  Best streak
+                </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="analyticsPlayers">
               <tr>
-                <td><div class="student"><span class="avatar">&#129418;</span><div><span class="name">Amina</span><div class="grade">Grade 3</div></div></div></td>
-                <td><span class="status" style="background:#FFDA13;"><span class="dot"></span>playing</span></td>
-                <td class="text-right xp">4,820</td>
-                <td class="text-right wins">42</td>
-                <td class="text-right acc">92%</td>
-                <td class="text-right streak">&#128293; 8</td>
-              </tr>
-              <tr>
-                <td><div class="student"><span class="avatar">&#128047;</span><div><span class="name">Kabelo</span><div class="grade">Grade 2</div></div></div></td>
-                <td><span class="status" style="background:#0a8f4a;"><span class="dot"></span>online</span></td>
-                <td class="text-right xp">4,610</td>
-                <td class="text-right wins">39</td>
-                <td class="text-right acc">89%</td>
-                <td class="text-right streak">&#128293; 6</td>
-              </tr>
-              <tr>
-                <td><div class="student"><span class="avatar">&#128053;</span><div><span class="name">Liam</span><div class="grade">Grade 1</div></div></div></td>
-                <td><span class="status" style="background:#94a3b8;"><span class="dot"></span>offline</span></td>
-                <td class="text-right xp">4,180</td>
-                <td class="text-right wins">35</td>
-                <td class="text-right acc">87%</td>
-                <td class="text-right streak">&#128293; 3</td>
-              </tr>
-              <tr>
-                <td><div class="student"><span class="avatar">&#128056;</span><div><span class="name">Sipho</span><div class="grade">Grade 3</div></div></div></td>
-                <td><span class="status" style="background:#0a8f4a;"><span class="dot"></span>online</span></td>
-                <td class="text-right xp">3,560</td>
-                <td class="text-right wins">29</td>
-                <td class="text-right acc">81%</td>
-                <td class="text-right streak">&#128293; 2</td>
+                <td colspan="6">
+                  Loading learner data…
+                </td>
               </tr>
             </tbody>
           </table>
