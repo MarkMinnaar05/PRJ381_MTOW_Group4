@@ -28,7 +28,7 @@ class GameSession {
         this.currentQuestion = null;
         this.badges = [];
 
-        // ✅ Game-over state
+        // Game-over state
         this.isGameOver = false;
         this.playerWon = null;
         this.gameOverReason = null;
@@ -81,13 +81,13 @@ class GameSession {
             this.questionsHistory.shift();
         }
 
-        // ✅ Check for win/loss after rope position updates
+        // Check for win/loss after rope position updates
         this.checkGameOver();
         
         return this.checkLevelUp();
     }
 
-    // ✅ NEW: Determine if the rope has hit either end
+    // Determine if the rope has hit either end
     checkGameOver() {
         if (this.isGameOver) return;
 
