@@ -15,7 +15,7 @@ let server;
 const open = [];
 
 before(async () => {
-    server = spawn(process.execPath, ['server.js'], {
+    server = spawn(process.execPath, ['dev/legacy-test-server.cjs'], {
         cwd: path.join(__dirname, '..'),
         env: { ...process.env, PORT: String(PORT) },
         stdio: ['ignore', 'pipe', 'inherit']

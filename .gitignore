@@ -108,3 +108,8 @@ backend/public/
 /package-lock
 
 node_modules
+# Local credentials and generated files
+.env
+.env.*
+!.env.example
+coverage/

@@ -191,8 +191,8 @@
     connect: function () {
       if (socket) return Promise.resolve(socket);
       if (connecting) return connecting;
-      connecting = loadScript(SERVER + "/socket.io/socket.io.js").then(function () {
-        socket = io(SERVER, { transports: ["websocket", "polling"] });
+      connecting = MTOWApi.ensureGuest(params.get("name") || "Player").then(function () { return loadScript(SERVER + "/socket.io/socket.io.js"); }).then(function () {
+        socket = io(SERVER, { transports: ["websocket", "polling"], auth: { token: localStorage.getItem("mtow.token") } });
         wireSocket();
         return socket;
       });

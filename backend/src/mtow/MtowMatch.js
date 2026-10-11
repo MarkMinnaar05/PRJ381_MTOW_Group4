@@ -2,13 +2,16 @@ const defaultRules = require('./rules');
 const { QuestionGenerator, solve } = require('./questions');
 
 class MtowMatch {
-    constructor({ matchId, mode, cpuLevel = 0, seats, send, award, rules = defaultRules }) {
+    constructor({ matchId, mode, cpuLevel = 0, seats, send, award, onChange = null, rules = defaultRules }) {
         this.matchId = matchId;
         this.mode = mode;
         this.cpuLevel = cpuLevel;
         this.rules = rules;
         this.send = send;
         this.award = award;
+        this.onChange = onChange;
+        this.startedAt = new Date().toISOString();
+        this.persistence = Promise.resolve();
         this.generator = new QuestionGenerator();
 
         this.seats = seats.map((seat, index) => ({
@@ -86,6 +89,7 @@ class MtowMatch {
         this.question = null;
         const correctAnswer = solve(q.operandA, q.operandB, q.operation);
         const submitted = Number(payload.submittedAnswer);
+        if (!Number.isFinite(submitted) || payload.submittedAnswer === null || String(payload.submittedAnswer ?? "").trim() === "") { this.question = q; return; }
         const responseMs = Math.max(0, Number(payload.responseTimeMs) || 0);
         const correct = submitted === correctAnswer;
 
@@ -109,6 +113,11 @@ class MtowMatch {
             });
         }
         this.recordForDifficulty(correct, responseMs);
+        this.persist({ playerId: seat.playerId, questionId: q.questionId, questionText: `${q.operandA} ${q.operation} ${q.operandB}`,
+            operation: q.operation, operand1: q.operandA, operand2: q.operandB, correctAnswer, submittedAnswer: submitted,
+            isCorrect: correct, responseTimeMs: responseMs, difficulty: q.difficulty || this.difficulty,
+            questionNumber: seat.totalQuestions, scoreEarned: correct ? this.points(responseMs) : 0,
+            streakAfter: seat.streak, ropePositionAfter: this.rope * seat.side });
         this.lastAnswer = { seatId, isCorrect: correct, questionId: q.questionId };
         this.afterAnswer();
     }
@@ -198,8 +207,7 @@ class MtowMatch {
     pull(amount) {
         const limit = this.rules.winThreshold;
         this.rope = Math.max(-limit, Math.min(limit, this.rope + amount));
-        if (this.rope >= limit) this.end(1, 'rope');
-        else if (this.rope <= -limit) this.end(-1, 'rope');
+
     }
 
     recordForDifficulty(correct, responseMs) {
@@ -217,6 +225,8 @@ class MtowMatch {
     }
 
     afterAnswer() {
+        if (this.rope >= this.rules.winThreshold) this.end(1, 'rope');
+        else if (this.rope <= -this.rules.winThreshold) this.end(-1, 'rope');
         if (this.isOver) return;
         this.sendState();
         this.nextQuestionIn = this.rules.nextQuestionDelaySeconds;
@@ -241,7 +251,24 @@ class MtowMatch {
         this.winnerSide = winnerSide;
         this.reason = reason;
         this.sendState();
-        for (const seat of this.seats) this.send(seat.id, 'MatchEnded', this.endedFor(seat));
+        this.persist();
+        const completions = [];
+        for (const seat of this.seats) {
+            try {
+                const result = this.onChange ? this.persistence.then(() => this.endedFor(seat)) : this.endedFor(seat);
+                if (result && typeof result.then === 'function') {
+                    completions.push(result.then(payload => this.send(seat.id, 'MatchEnded', payload)).catch(() =>
+                        this.send(seat.id, 'Error', { code: 'database_error', message: 'Game ended, but saving failed. Ask your teacher to check the server.' })));
+                } else this.send(seat.id, 'MatchEnded', result);
+            } catch (_) { this.send(seat.id, 'Error', { code: 'database_error', message: 'Could not save game result' }); }
+        }
+        this.completion = Promise.all(completions);
+    }
+
+    persist(answer) {
+        if (!this.onChange) return;
+        this.persistence = this.onChange(this, answer);
+        this.persistence.catch(() => {});
     }
 
     resultFor(seat) {
@@ -284,7 +311,12 @@ class MtowMatch {
 
     endedFor(seat) {
         const xpEarned = seat.score;
-        const progress = this.award(seat.id, xpEarned);
+        const progress = this.award(seat.id, xpEarned, this.matchId);
+        if (progress && typeof progress.then === 'function') return progress.then(p => this.resultPayload(seat, xpEarned, p));
+        return this.resultPayload(seat, xpEarned, progress);
+    }
+
+    resultPayload(seat, xpEarned, progress) {
         return {
             matchId: this.matchId,
             result: this.resultFor(seat),

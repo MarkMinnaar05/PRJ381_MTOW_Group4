@@ -71,8 +71,8 @@
 
     
     connect: function () {
-      return loadScript(SERVER + "/socket.io/socket.io.js").then(function () {
-        socket = io(SERVER, { transports: ["websocket", "polling"], auth: player() });
+      return MTOWApi.ensureGuest(params.get("name") || "Player").then(function () { return loadScript(SERVER + "/socket.io/socket.io.js"); }).then(function () {
+        socket = io(SERVER, { transports: ["websocket", "polling"], auth: { token: localStorage.getItem("mtow.token") } });
         wire();
         return new Promise(function (resolve) {
           var timer = setTimeout(function () { resolve(false); }, CONNECT_TIMEOUT_MS);

@@ -1,0 +1,338 @@
+{
+  "info": {
+    "name": "MTOW MongoDB and API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "teacherToken",
+      "value": ""
+    },
+    {
+      "key": "classCode",
+      "value": ""
+    },
+    {
+      "key": "sessionId",
+      "value": ""
+    },
+    {
+      "key": "questionId",
+      "value": ""
+    },
+    {
+      "key": "answer",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Database health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/health"
+      }
+    },
+    {
+      "name": "2. Register a teacher (use a new email)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/register",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Teacher\",\n  \"email\": \"teacher@example.com\",\n  \"password\": \"ChangeThisDemoPassword1!\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const d=pm.response.json(); if(d.token){pm.collectionVariables.set(\"teacherToken\",d.token);pm.collectionVariables.set(\"classCode\",d.user.classCode);}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Teacher login (for subsequent runs)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"teacher@example.com\",\n  \"password\": \"ChangeThisDemoPassword1!\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const d=pm.response.json(); if(d.token){pm.collectionVariables.set(\"teacherToken\",d.token);pm.collectionVariables.set(\"classCode\",d.user.classCode);}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Join the teacher class",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/guest",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Mahlatse\",\n  \"classCode\": \"{{classCode}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const d=pm.response.json(); if(d.token)pm.collectionVariables.set(\"token\",d.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Start practice session",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/api/session/start",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"difficulty\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const d=pm.response.json(); if(d.sessionId)pm.collectionVariables.set(\"sessionId\",d.sessionId);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Get question",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/api/question/next/{{sessionId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const q=pm.response.json(); if(q.id){pm.collectionVariables.set(\"questionId\",q.id);const a=q.operand1,b=q.operand2;pm.collectionVariables.set(\"answer\",q.operation===\"+\"?a+b:q.operation===\"-\"?a-b:q.operation===\"\u00d7\"?a*b:a/b);}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Submit answer",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/api/answer/submit",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"sessionId\": \"{{sessionId}}\",\n  \"questionId\": \"{{questionId}}\",\n  \"submittedAnswer\": \"{{answer}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "8. Read session",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/api/session/status/{{sessionId}}"
+      }
+    },
+    {
+      "name": "9. Finish round and award XP",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/api/session/end/{{sessionId}}"
+      }
+    },
+    {
+      "name": "10. Saved profile",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/api/players/me"
+      }
+    },
+    {
+      "name": "11. Saved history",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/api/players/me/history"
+      }
+    },
+    {
+      "name": "12. Class leaderboard",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/api/leaderboard"
+      }
+    },
+    {
+      "name": "13. Teacher analytics",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{teacherToken}}",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/api/analytics/dashboard?includeSample=false"
+      }
+    },
+    {
+      "name": "14. Teacher database status",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{teacherToken}}",
+            "type": "text"
+          }
+        ],
+        "url": "{{baseUrl}}/api/analytics/status"
+      }
+    }
+  ]
+}

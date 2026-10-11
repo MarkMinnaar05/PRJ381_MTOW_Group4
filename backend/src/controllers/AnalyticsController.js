@@ -1,10 +1,3 @@
-const analyticsService =
-    require('../services/AnalyticsService');
-
-const {
-    generateSampleData
-} = require('../services/SampleDataGenerator');
-
 const {
     renderReportHtml
 } = require('../services/ReportRenderer');
@@ -110,7 +103,7 @@ exports.getDashboard = handle(
             createFilters(request.query);
 
         const dashboard =
-            analyticsService.getDashboard(filters);
+            await request.analytics.getDashboard(filters);
 
         response.json({
             success: true,
@@ -123,7 +116,7 @@ exports.getDashboard = handle(
 exports.getOverview = handle(
     async (request, response) => {
         const overview =
-            analyticsService.getOverview(
+            await request.analytics.getOverview(
                 createFilters(request.query)
             );
 
@@ -138,7 +131,7 @@ exports.getOverview = handle(
 exports.getOperations = handle(
     async (request, response) => {
         const operations =
-            analyticsService.getOperationBreakdown(
+            await request.analytics.getOperationBreakdown(
                 createFilters(request.query)
             );
 
@@ -153,7 +146,7 @@ exports.getOperations = handle(
 exports.getDifficulty = handle(
     async (request, response) => {
         const difficulty =
-            analyticsService.getDifficultyBreakdown(
+            await request.analytics.getDifficultyBreakdown(
                 createFilters(request.query)
             );
 
@@ -168,7 +161,7 @@ exports.getDifficulty = handle(
 exports.getTrend = handle(
     async (request, response) => {
         const trend =
-            analyticsService.getTrend(
+            await request.analytics.getTrend(
                 createFilters(request.query)
             );
 
@@ -183,7 +176,7 @@ exports.getTrend = handle(
 exports.getResponseTimes = handle(
     async (request, response) => {
         const responseTimes =
-            analyticsService.getResponseTimeDistribution(
+            await request.analytics.getResponseTimeDistribution(
                 createFilters(request.query)
             );
 
@@ -198,7 +191,7 @@ exports.getResponseTimes = handle(
 exports.getPlayers = handle(
     async (request, response) => {
         const players =
-            analyticsService.getPlayerStats(
+            await request.analytics.getPlayerStats(
                 createFilters(request.query)
             );
 
@@ -213,7 +206,7 @@ exports.getPlayers = handle(
 exports.getPlayerDetail = handle(
     async (request, response) => {
         const player =
-            analyticsService.getPlayerDetail(
+            await request.analytics.getPlayerDetail(
                 request.params.playerName,
                 createFilters(request.query)
             );
@@ -237,7 +230,7 @@ exports.getPlayerDetail = handle(
 exports.getTopPerformers = handle(
     async (request, response) => {
         const topPerformers =
-            analyticsService.getTopPerformers(
+            await request.analytics.getTopPerformers(
                 createFilters(request.query)
             );
 
@@ -252,7 +245,7 @@ exports.getTopPerformers = handle(
 exports.getRecentActivity = handle(
     async (request, response) => {
         const recentActivity =
-            analyticsService.getRecentActivity(
+            await request.analytics.getRecentActivity(
                 createFilters(request.query)
             );
 
@@ -267,7 +260,7 @@ exports.getRecentActivity = handle(
 exports.getInsights = handle(
     async (request, response) => {
         const insights =
-            analyticsService.getInsights(
+            await request.analytics.getInsights(
                 createFilters(request.query)
             );
 
@@ -282,7 +275,7 @@ exports.getInsights = handle(
 exports.getReport = handle(
     async (request, response) => {
         const report =
-            analyticsService.buildReport(
+            await request.analytics.buildReport(
                 createFilters(request.query)
             );
 
@@ -303,7 +296,7 @@ exports.getReport = handle(
 exports.exportCsv = handle(
     async (request, response) => {
         const csv =
-            analyticsService.exportCsv(
+            await request.analytics.exportCsv(
                 createFilters(request.query)
             );
 
@@ -326,7 +319,7 @@ exports.getStatus = handle(
     async (request, response) => {
         response.json({
             success: true,
-            status: analyticsService.getStatus()
+            status: await request.analytics.getStatus()
         });
     }
 );
@@ -335,9 +328,7 @@ exports.getStatus = handle(
 exports.loadSampleData = handle(
     async (request, response) => {
         const counts =
-            generateSampleData(
-                analyticsService.store
-            );
+            await request.analytics.loadSample();
 
         response.status(201).json({
             success: true,
@@ -350,9 +341,7 @@ exports.loadSampleData = handle(
 // Remove only sample data
 exports.clearSampleData = handle(
     async (request, response) => {
-        analyticsService.store.clear({
-            sampleOnly: true
-        });
+        await request.analytics.clearSample();
 
         response.json({
             success: true,

@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Math Tug-of-War — Practice</title>
+<link rel="stylesheet" href="/frontend/styles/main.css"></head>
+<body><main class="container" style="max-width:650px;margin:60px auto;padding:24px">
+<a href="/frontend/index.html">← Home</a><h1>Math practice</h1><p>Answer questions to earn XP. Ten correct pulls win the round.</p>
+<button id="startPractice">Start a round</button><h2 id="practiceQuestion">Ready when you are.</h2>
+<form id="practiceAnswer"><label>Your answer <input id="practiceValue" type="number" step="any" required disabled></label><button id="submitPractice" disabled>Answer</button></form>
+<p id="practiceFeedback" role="status"></p><p id="practiceScore"></p><button id="endPractice" disabled>Finish and save</button>
+<p><a href="/frontend/pages/StudentDashboard.html">My progress</a> · <a href="/frontend/pages/Leaderboard.html">Leaderboard</a></p>
+</main><script src="/frontend/api-client.js"></script><script src="/frontend/practice.js"></script></body></html>

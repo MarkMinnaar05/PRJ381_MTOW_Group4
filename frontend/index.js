@@ -56,8 +56,7 @@ function checkAuth() {
 /* Sign Out */
 document.addEventListener('click', function(e) {
   if (e.target && e.target.id === 'signOutBtn') {
-    localStorage.removeItem('user');
-    window.location.href = '/frontend/index.html';
+    MTOWApi.logout().finally(() => { window.location.href = '/frontend/index.html'; });
   }
 });
 

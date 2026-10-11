@@ -1,20 +1,27 @@
 {
   "name": "mtow-backend",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "Math Tug-of-War multiplayer room server (Socket.IO).",
+  "description": "Math Tug-of-War API and Socket.IO server with MongoDB persistence",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "test": "node --test"
+    "test": "node --test",
+    "test:database": "node --test tests/mongodb.integration.test.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.21.2",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "mongodb": "^7.0.0",
+    "dotenv": "^17.2.0"
   },
   "devDependencies": {
-    "socket.io-client": "^4.8.1"
+    "socket.io-client": "^4.8.1",
+    "mongodb-memory-server": "^11.0.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
   }
 }

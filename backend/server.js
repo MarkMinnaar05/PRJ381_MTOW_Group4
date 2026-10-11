@@ -1,4 +1,11 @@
 // server.js
+require('dotenv').config({ path: require('path').join(__dirname, '.env'), quiet: true });
+const { connectDatabase } = require('./src/config/database');
+const { AuthService } = require('./src/database/AuthService');
+const { MongoPlayerStore } = require('./src/database/MongoPlayerStore');
+const { ApiGameService } = require('./src/database/ApiGameService');
+const { MatchRecorder } = require('./src/database/MatchRecorder');
+const { LegacyRecorder } = require('./src/database/LegacyRecorder');
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -11,15 +18,31 @@ const scoringService = require('./src/services/ScoringService');
 const { Matchmaker } = require('./src/services/Matchmaker');
 const { registerMtow } = require('./src/mtow/registerMtow');
 
+function createApplication(db) {
 const app = express();
-app.use(cors());
+const players = new MongoPlayerStore(db);
+const auth = new AuthService(db);
+const recorder = new MatchRecorder(db);
+const legacy = new LegacyRecorder(db, players);
+app.locals.db = db;
+app.locals.players = players;
+app.locals.auth = auth;
+app.locals.games = new ApiGameService(db, players);
+app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:3000' }));
 
-app.use(express.json());
+app.use(express.json({ limit: '32kb' }));
 app.use('/api/analytics', require('./src/routes/analytics'));
 
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*" } });
-registerMtow(io);
+const io = new Server(server, { cors: { origin: process.env.FRONTEND_URL || 'http://localhost:3000' } });
+io.use((socket, next) => {
+    auth.authenticate(socket.handshake.auth?.token).then(user => {
+        socket.data.identity = user;
+        next();
+    }).catch(() => next(new Error('Sign in again')));
+});
+const mtow = registerMtow(io, { store: players, recorder });
+app.use('/api', require('./src/routes/api'));
 
 const PORT = process.env.PORT || 3000;
 
@@ -59,6 +82,10 @@ function createMatchSession(a, b) {
     session.classId = a.classId;
     session.mode = a.mode;
     sessions.set(roomId, session);
+    for (const entry of [a, b]) {
+        Object.assign(session.players[entry.socketId], { playerId: entry.playerId, classId: entry.classId, totalQuestions: 0, correctAnswers: 0, responseTotal: 0 });
+    }
+    legacy.capture(session);
 
     for (const entry of [a, b]) {
         const s = io.sockets.sockets.get(entry.socketId);
@@ -85,6 +112,7 @@ function endMatchOpponentLeft(roomId, session, leaverId) {
             gameState: session.getSummary()
         }));
     }
+    legacy.capture(session);
     sessions.delete(roomId);
 }
 
@@ -94,7 +122,7 @@ io.on('connection', (socket) => {
     socket.on('find_match', (data) => {
         try {
             const info = parseFindMatch(data);
-            const entry = { socketId: socket.id, ...info };
+            const entry = { socketId: socket.id, ...info, playerId: socket.data.identity.id, name: socket.data.identity.name, classId: socket.data.identity.classId };
 
             let result = matchmaker.enqueue(entry);
             
@@ -112,9 +140,9 @@ io.on('connection', (socket) => {
             } else {
                 socket.emit('queue_joined', JSON.stringify({
                     success: true,
-                    classId: info.classId,
+                    classId: entry.classId,
                     mode: info.mode,
-                    waiting: matchmaker.size(info.classId, info.mode)
+                    waiting: matchmaker.size(entry.classId, entry.mode)
                 }));
                 console.log(`${info.name} queued (${info.classId}/${info.mode})`);
             }
@@ -132,14 +160,17 @@ io.on('connection', (socket) => {
 
     socket.on('create_room', (data) => {
         try {
-            const { playerName = 'Host', difficulty = 1 } = JSON.parse(data || '{}');
+            const { difficulty = 1 } = JSON.parse(data || '{}');
+            const playerName = socket.data.identity.name;
             const roomId = generateRoomCode();
             const validDifficulty = Math.max(1, Math.min(5, difficulty || 1));
 
             const session = new GameSession(roomId, socket.id, playerName, validDifficulty);
             questionService.preCacheQuestions(validDifficulty, 10);
 
+            Object.assign(session.players[socket.id], { playerId: socket.data.identity.id, classId: socket.data.identity.classId, totalQuestions: 0, correctAnswers: 0, responseTotal: 0 });
             sessions.set(roomId, session);
+            legacy.capture(session);
             socket.join(roomId);
 
             socket.emit('room_created', JSON.stringify({
@@ -157,12 +188,16 @@ io.on('connection', (socket) => {
 
     socket.on('join_room', (data) => {
         try {
-            const { roomId, playerName = 'Guest' } = JSON.parse(data || '{}');
+            const { roomId } = JSON.parse(data || '{}');
+            const playerName = socket.data.identity.name;
             const session = sessions.get(roomId);
 
             if (!session) {
                 socket.emit('error_msg', 'Room not found');
                 return;
+            }
+            if (Object.values(session.players)[0]?.classId !== socket.data.identity.classId) {
+                socket.emit('error_msg', 'Room not found'); return;
             }
             if (session.isGameOver) {
                 socket.emit('error_msg', 'Game already over');
@@ -175,6 +210,8 @@ io.on('connection', (socket) => {
                 return;
             }
 
+            Object.assign(session.players[socket.id], { playerId: socket.data.identity.id, classId: socket.data.identity.classId, totalQuestions: 0, correctAnswers: 0, responseTotal: 0 });
+            legacy.capture(session);
             socket.join(roomId);
             io.to(roomId).emit('player_joined', JSON.stringify({
                 success: true,
@@ -193,6 +230,7 @@ io.on('connection', (socket) => {
         if (session && session.hostId === socket.id) {
             const question = questionService.getQuestion(session.difficulty);
             session.currentQuestion = question.toJSON();
+            legacy.capture(session);
 
             io.to(roomId).emit('game_started', JSON.stringify({
                 success: true,
@@ -213,6 +251,8 @@ io.on('connection', (socket) => {
             const player = session.players[socket.id];
             if (!player) return;
 
+            if (!session.currentQuestion || !Number.isFinite(Number(submittedAnswer)) || submittedAnswer === null || String(submittedAnswer ?? "").trim() === "") return;
+            const answeredQuestion = session.currentQuestion;
             const isCorrect = Number(submittedAnswer) === Number(session.currentQuestion?.answer);
 
             const scoreResult = scoringService.calculateScore(
@@ -224,6 +264,12 @@ io.on('connection', (socket) => {
 
            
             session.processAnswer(socket.id, isCorrect, scoreResult.scoreEarned, scoreResult.xpEarned);
+            player.totalQuestions = (player.totalQuestions || 0) + 1;
+            player.correctAnswers = (player.correctAnswers || 0) + (isCorrect ? 1 : 0);
+            player.responseTotal = (player.responseTotal || 0) + Math.max(0, Number(responseTime) || 0);
+            player.bestStreak = Math.max(player.bestStreak || 0, player.streak);
+            legacy.capture(session, answeredQuestion, player, submittedAnswer, isCorrect, responseTime, scoreResult.scoreEarned);
+            session.currentQuestion = null;
 
             const levelUpResult = scoringService.checkLevelUp(player.xp, player.level);
             if (levelUpResult.leveledUp) {
@@ -242,7 +288,7 @@ io.on('connection', (socket) => {
                 sessions.delete(roomId);
             } else {
     
-                if (isCorrect) {
+                {
                     const nextQ = questionService.getQuestion(session.difficulty);
                     session.currentQuestion = nextQ.toJSON();
                 }
@@ -285,11 +331,55 @@ io.on('connection', (socket) => {
     });
 });
 
+app.use('/frontend', express.static(path.join(__dirname, '..', 'frontend')));
+app.get('/', (_req, res) => res.redirect('/frontend/index.html'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use((req, res) => {
     res.status(404).json({ success: false, error: 'Route not found' });
 });
 
-server.listen(PORT, () => {
-    console.log(`Multiplayer Tug-of-War Server running on port ${PORT}`);
+app.use((error, _req, res, _next) => {
+    const status = error.status || (error.type === 'entity.parse.failed' ? 400 : 500);
+    if (status >= 500) console.error(`[API] ${error.name}`);
+    res.status(status).json({ success: false, error: status >= 500 ? 'Database or server request failed' : error.message });
 });
+return { app, io, server, recorder, legacy, stop: async () => {
+    mtow.stop();
+    await new Promise(resolve => io.close(resolve));
+    await Promise.all([recorder.flush(), legacy.flush(), mtow.flush()]);
+    sessions.clear();
+} };
+}
+
+async function main() {
+    let connection;
+    try {
+        connection = await connectDatabase();
+        const runtime = createApplication(connection.db);
+        const port = Number(process.env.PORT || 3000);
+        await new Promise((resolve, reject) => {
+            runtime.server.once('error', reject);
+            runtime.server.listen(port, resolve);
+        });
+        console.log(`MongoDB connected: ${connection.db.databaseName}`);
+        console.log(`Multiplayer Tug-of-War Server running on port ${port}`);
+        console.log(`Open http://localhost:${port}/frontend/index.html`);
+        let stopping = false;
+        const stop = async () => {
+            if (stopping) return; stopping = true;
+            try { await runtime.stop(); } finally { await connection.client.close(); }
+        };
+        process.once('SIGINT', () => stop().then(() => process.exit(0)));
+        process.once('SIGTERM', () => stop().then(() => process.exit(0)));
+    } catch (error) {
+        console.error(`Startup failed (${error.name}). Check backend/.env, Atlas IP access, and your network.`);
+        if (error.reason?.servers) for (const server of error.reason.servers.values()) {
+            const cause = server.error?.cause?.code || server.error?.code;
+            if (cause) console.error(`Connection cause: ${cause}`);
+        }
+        if (connection) await connection.client.close();
+        process.exitCode = 1;
+    }
+}
+if (require.main === module) main();
+module.exports = { createApplication };
