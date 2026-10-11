@@ -7,7 +7,7 @@ Interactive competitive mathematics learning platform — VIR-BCOM Group 4.
 ```
 mtow-platform/
   backend/        ← Node.js / Express server, database logic
-  frontend/       ← Views and other ejs files
+  frontend/       ← Views and integration with other parts
   docs/           ← Project documentation, diagrams, reports
   README.md
 ```
