@@ -38,7 +38,7 @@ If you are unsure about anything, ask in the group chat **before** you push.
 | Mark | Unity (the game) | `feature/unity-build` |
 | Jesse | Backend | `feature/backend-matchmaking`, `feature/backend-scoring` |
 | Davidzo | Frontend (website) | `feature/frontend-play-page`, `feature/frontend-auth` |
-| Kudzai | API & Database | `feature/api-endpoints`, `feature/database` |
+| Kudzai/Mahlatse | API & Database | `feature/api-endpoints`, `feature/database` |
 | Dominic | Gamification | `feature/xp-system`, `feature/leaderboard` |
 | Elaine | Dashboard | `feature/teacher-dashboard`, `feature/analytics` |
 | Keletso | Unit Testing | `feature/unit-tests` |
