@@ -59,59 +59,38 @@
     }
 
 
-    /* Login */
-    const teacherLoginForm = document.getElementById('teacherLogin');
-    if (teacherLoginForm) {
-      teacherLoginForm.addEventListener('submit', function(e) {
-        e.preventDefault();
 
-        // Integrate hashing and mongoose here
-        const user = {
-          name: 'Teacher',
-          avatar: '', 
-          role: 'teacher',
-        };
-        localStorage.setItem('user', JSON.stringify(user));
-
-        window.location.href = '/frontend/pages/TeacherDashboard.html';
+    function bind(id, path, body, target) {
+      const form = document.getElementById(id);
+      if (!form) return;
+      const message = document.createElement('p');
+      message.setAttribute('role', 'status');
+      form.appendChild(message);
+      form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        const button = form.querySelector('button[type="submit"]');
+        if (button) button.disabled = true;
+        try {
+          const data = await MTOWApi.request(path, { method: 'POST', body: JSON.stringify(body(form)) });
+          MTOWApi.saveAuth(data);
+          location.href = target;
+        } catch (error) { message.textContent = error.message; }
+        finally { if (button) button.disabled = false; }
       });
     }
-
-    /* Sign Up */
-    const teacherSignupForm = document.getElementById('teacherSignup');
-    if (teacherSignupForm) {
-      teacherSignupForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        // Integrate hashing and mongoose here
-        const user = {
-          name: 'Teacher',
-          avatar: '', 
-          role: 'teacher',
-        };
-        localStorage.setItem('user', JSON.stringify(user));
-
-        window.location.href = '/frontend/pages/TeacherDashboard.html';
-      });
+    bind('teacherLogin', '/auth/login', form => ({ email: form.querySelector('input[type="email"]').value,
+      password: form.querySelector('input[type="password"]').value }), '/frontend/pages/TeacherDashboard.html');
+    bind('teacherSignup', '/auth/register', form => ({ name: form.querySelector('input[type="text"]').value,
+      email: form.querySelector('input[type="email"]').value, password: form.querySelector('input[type="password"]').value }), '/frontend/pages/TeacherDashboard.html');
+    const student = document.getElementById('studentCodeForm');
+    if (student) {
+      const label = document.createElement('label');
+      label.textContent = 'Your display name';
+      const name = document.createElement('input');
+      name.id = 'studentDisplayName'; name.type = 'text'; name.required = true; name.maxLength = 24; name.placeholder = 'e.g. Mahlatse';
+      label.appendChild(name); student.prepend(label);
     }
-
-    /* Student Form */
-    const studentCodeForm = document.getElementById('studentCodeForm');
-    if (studentCodeForm) {
-      studentCodeForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        // Integrate hashing and mongoose here
-        const user = {
-          name: 'Student',
-          avatar: '',
-          role: 'student',
-        };
-        localStorage.setItem('user', JSON.stringify(user));
-
-        window.location.href = '/frontend/pages/StudentDashboard.html';
-      });
-    }
-
-  } 
+    bind('studentCodeForm', '/auth/guest', form => ({ name: document.getElementById('studentDisplayName').value,
+      classCode: form.querySelector('input[placeholder="e.g. 7X9K2L"]').value }), '/frontend/pages/StudentDashboard.html');
+  }
 })();

@@ -36,82 +36,33 @@
         <div>
           <span>Teacher</span>
           <h1>Class dashboard</h1>
-          <p style="color:var(--slate-600);">Manage classes, host live games, and track student performance.</p>
+          <p style="color:var(--slate-600);">Share your class code and track learners' recorded maths activity.</p>
         </div>
         <div class="actions">
-          <button class="host">+ Host live game</button>
+          <button type="button" id="refreshAnalytics" disabled>Refresh analytics</button>
+          <button type="button" id="downloadReport" disabled>Download teacher report</button>
         </div>
       </div>
-
-      <div class="class-tabs">
-        <button><div>Grade 3B</div></button>
-        <button><div>Grade 2A</div></button>
-        <button><div>Grade 1C</div></button>
-        <button class="add">+ New class</button>
-      </div>
-
+      <p>Your class code: <strong id="teacherClassCode">Loading…</strong></p>
+      <p>Give this code to learners when they sign in.</p>
+      <p id="teacherStatus" role="status" aria-live="polite">Loading your class…</p>
+      <noscript>Enable JavaScript to sign in and load your class data.</noscript>
       <div class="metrics">
-        <div class="metric"><div class="label">Students</div><div class="value" style="color:var(--blue);">5</div></div>
-        <div class="metric"><div class="label">Online now</div><div class="value" style="color:#0a8f4a;">3</div></div>
-        <div class="metric"><div class="label">Avg accuracy</div><div class="value" style="color:var(--yellow);">85%</div></div>
-        <div class="metric"><div class="label">Avg XP</div><div class="value" style="color:var(--red);">3,966</div></div>
+        <div class="metric"><div class="label">Learners with activity</div><div id="teacherLearnerCount" class="value" style="color:var(--blue);">—</div></div>
+        <div class="metric"><div class="label">Questions answered</div><div id="teacherQuestionCount" class="value" style="color:#0a8f4a;">—</div></div>
+        <div class="metric"><div class="label">Accuracy</div><div id="teacherAccuracy" class="value" style="color:var(--yellow);">—</div></div>
+        <div class="metric"><div class="label">Sessions played</div><div id="teacherSessionCount" class="value" style="color:var(--red);">—</div></div>
       </div>
-
-      <div class="teacher-tabs">
-        <button data-ttab="students">Students</button>
-      </div>
-
-      <div id="teacherStudents">
+      <section id="teacherStudents" aria-label="Learner activity">
+        <h2>Learner activity</h2>
         <div class="teacher-table">
           <table>
-            <thead>
-              <tr>
-                <th>Student</th>
-                <th>Status</th>
-                <th class="text-right">XP</th>
-                <th class="text-right">Wins</th>
-                <th class="text-right">Accuracy</th>
-                <th class="text-right">Streak</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><div class="student"><span class="avatar">&#129418;</span><div><span class="name">Amina</span><div class="grade">Grade 3</div></div></div></td>
-                <td><span class="status" style="background:#FFDA13;"><span class="dot"></span>playing</span></td>
-                <td class="text-right xp">4,820</td>
-                <td class="text-right wins">42</td>
-                <td class="text-right acc">92%</td>
-                <td class="text-right streak">&#128293; 8</td>
-              </tr>
-              <tr>
-                <td><div class="student"><span class="avatar">&#128047;</span><div><span class="name">Kabelo</span><div class="grade">Grade 2</div></div></div></td>
-                <td><span class="status" style="background:#0a8f4a;"><span class="dot"></span>online</span></td>
-                <td class="text-right xp">4,610</td>
-                <td class="text-right wins">39</td>
-                <td class="text-right acc">89%</td>
-                <td class="text-right streak">&#128293; 6</td>
-              </tr>
-              <tr>
-                <td><div class="student"><span class="avatar">&#128053;</span><div><span class="name">Liam</span><div class="grade">Grade 1</div></div></div></td>
-                <td><span class="status" style="background:#94a3b8;"><span class="dot"></span>offline</span></td>
-                <td class="text-right xp">4,180</td>
-                <td class="text-right wins">35</td>
-                <td class="text-right acc">87%</td>
-                <td class="text-right streak">&#128293; 3</td>
-              </tr>
-              <tr>
-                <td><div class="student"><span class="avatar">&#128056;</span><div><span class="name">Sipho</span><div class="grade">Grade 3</div></div></div></td>
-                <td><span class="status" style="background:#0a8f4a;"><span class="dot"></span>online</span></td>
-                <td class="text-right xp">3,560</td>
-                <td class="text-right wins">29</td>
-                <td class="text-right acc">81%</td>
-                <td class="text-right streak">&#128293; 2</td>
-              </tr>
-            </tbody>
+            <thead><tr><th>Learner</th><th>Questions</th><th>Accuracy</th><th>Sessions</th></tr></thead>
+            <tbody id="teacherStudentRows"><tr><td colspan="4">Loading recorded activity…</td></tr></tbody>
           </table>
         </div>
-      </div>
-
+      </section>
+      <p><a href="/frontend/pages/Auth.html">Open sign-in page</a></p>
     </div>
   </main>
 
@@ -129,6 +80,7 @@
     </div>
   </footer>
 
+  <script src="/frontend/api-client.js"></script>
   <script src="/frontend/index.js"></script>
   <script src="/frontend/pages/TeacherDashboard.js"></script>
 </body>

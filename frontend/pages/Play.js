@@ -1,4 +1,4 @@
-/* Game Button Event Listener */
-document.getElementById('gameDemoBtn').addEventListener('click', function() {
-  alert('Game not yet implemented. This is a placeholder.');
+/* The ZIP has no Unity WebGL build yet. This button opens the connected practice game. */
+document.getElementById('gameDemoBtn').addEventListener('click', function () {
+  location.href = '/frontend/practice.html';
 });

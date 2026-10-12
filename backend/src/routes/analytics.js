@@ -4,6 +4,16 @@ const analyticsController =
     require('../controllers/AnalyticsController');
 
 const router = express.Router();
+const { MongoAnalytics } = require('../database/MongoAnalytics');
+router.use((req, res, next) => {
+    const token = req.get('authorization')?.replace(/^Bearer\s+/i, '');
+    req.app.locals.auth.authenticate(token).then(user => {
+        if (user.role !== 'teacher') return res.status(403).json({ success: false, error: 'Teacher access required' });
+        req.analytics = new MongoAnalytics(req.app.locals.db, user.classId);
+        next();
+    }).catch(next);
+});
+
 
 // Main dashboard
 router.get(
