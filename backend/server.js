@@ -42,7 +42,9 @@ io.use((socket, next) => {
     }).catch(() => next(new Error('Sign in again')));
 });
 const mtow = registerMtow(io, { store: players, recorder });
+app.use('/api/competition-leaderboard', require('./src/routes/competitionLeaderboard'));
 app.use('/api', require('./src/routes/api'));
+
 
 const PORT = process.env.PORT || 3000;
 
