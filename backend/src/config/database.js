@@ -1,8 +1,9 @@
 const { MongoClient } = require('mongodb');
+const { connectionOptions } = require('./connectionDiagnostics');
 async function connectDatabase(uri = process.env.MONGODB_URI, name = process.env.MONGODB_DB_NAME || 'mtow') {
     if (!uri) throw new Error('MONGODB_URI is missing. Create backend/.env from .env.example.');
     if (!/^[a-zA-Z0-9_-]+$/.test(name)) throw new Error('Invalid MONGODB_DB_NAME');
-    const client = new MongoClient(uri, { serverSelectionTimeoutMS: 10000, maxPoolSize: 10 });
+    const client = new MongoClient(uri, connectionOptions());
     try {
         await client.connect();
         const db = client.db(name);

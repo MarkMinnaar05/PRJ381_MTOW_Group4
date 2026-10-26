@@ -7,6 +7,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
+    "diagnose": "node scripts/diagnose-connection.js",
     "test": "node --test",
     "test:database": "node --test tests/mongodb.integration.test.js"
   },

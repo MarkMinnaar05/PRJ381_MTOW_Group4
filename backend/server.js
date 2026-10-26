@@ -1,6 +1,7 @@
 // server.js
 require('dotenv').config({ path: require('path').join(__dirname, '.env'), quiet: true });
 const { connectDatabase } = require('./src/config/database');
+const { errorDetails } = require('./src/config/connectionDiagnostics');
 const { AuthService } = require('./src/database/AuthService');
 const { MongoPlayerStore } = require('./src/database/MongoPlayerStore');
 const { ApiGameService } = require('./src/database/ApiGameService');
@@ -355,9 +356,13 @@ return { app, io, server, recorder, legacy, stop: async () => {
 
 async function main() {
     let connection;
+    let runtime;
+    let stage = 'MongoDB connection';
     try {
         connection = await connectDatabase();
-        const runtime = createApplication(connection.db);
+        stage = 'application setup';
+        runtime = createApplication(connection.db);
+        stage = 'HTTP listener';
         const port = Number(process.env.PORT || 3000);
         await new Promise((resolve, reject) => {
             runtime.server.once('error', reject);
@@ -374,11 +379,14 @@ async function main() {
         process.once('SIGINT', () => stop().then(() => process.exit(0)));
         process.once('SIGTERM', () => stop().then(() => process.exit(0)));
     } catch (error) {
-        console.error(`Startup failed (${error.name}). Check backend/.env, Atlas IP access, and your network.`);
-        if (error.reason?.servers) for (const server of error.reason.servers.values()) {
-            const cause = server.error?.cause?.code || server.error?.code;
-            if (cause) console.error(`Connection cause: ${cause}`);
+        console.error(`Startup failed during ${stage}.`);
+        for (const detail of errorDetails(error)) console.error(detail);
+        if (error.code === 'EADDRINUSE') {
+            console.error(`Port ${process.env.PORT || 3000} is occupied. Check /api/health in the existing server, or stop that server before restarting.`);
+        } else if (stage === 'MongoDB connection') {
+            console.error('Check backend/.env and Atlas database-user/IP access. Run npm.cmd run diagnose for DNS, TCP, TLS and driver checks.');
         }
+        if (runtime) await runtime.stop().catch(() => {});
         if (connection) await connection.client.close();
         process.exitCode = 1;
     }

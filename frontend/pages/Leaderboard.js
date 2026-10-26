@@ -185,7 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.head.appendChild(css);
 
-    let guestReady = false;
     let busy = false;
     let rendered = false;
 
@@ -200,6 +199,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return node;
     };
+
+    const status = el('p');
+    status.setAttribute('role', 'status');
+    root.before(status);
+
+    function showError(error) {
+        status.textContent = (rendered ? 'Rankings were not refreshed. ' : '') + error.message + ' ';
+        const retry = el('button', '', 'Try again');
+        retry.type = 'button';
+        retry.addEventListener('click', load);
+        status.appendChild(retry);
+        if (error.status === 401) {
+            const signIn = el('a', '', ' Sign in or join your teacher’s class');
+            signIn.href = '/frontend/pages/Auth.html';
+            status.appendChild(signIn);
+        }
+    }
 
     const num = value => {
         if (
@@ -415,7 +431,8 @@ document.addEventListener('DOMContentLoaded', () => {
             el(
                 'p',
                 'rank-subtitle',
-                '1v1 rankings • victories, maths accuracy and XP'
+                (data.classId === 'PUBLIC' ? 'Public group' : 'Class ' + data.classId) +
+                ' • 1v1 rankings, maths accuracy and XP'
             )
         );
 
@@ -503,10 +520,8 @@ document.addEventListener('DOMContentLoaded', () => {
         busy = true;
 
         try {
-            if (!guestReady) {
-                await MTOWApi.ensureGuest();
-                guestReady = true;
-            }
+            status.textContent = 'Loading your class rankings…';
+            await MTOWApi.currentUser();
 
             const data = await MTOWApi.request(
                 '/competition-leaderboard'
@@ -517,8 +532,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             render(data);
+            status.textContent = data.classId === 'PUBLIC'
+                ? 'You are viewing the public group. Sign in with your teacher’s class code to see that class.'
+                : 'Rankings loaded for class ' + data.classId + '.';
         } catch (error) {
             console.error(error);
+            if (error.status === 401) {
+                rendered = false;
+                root.replaceChildren();
+            }
+            showError(error);
 
             if (!rendered) {
                 root.replaceChildren(
