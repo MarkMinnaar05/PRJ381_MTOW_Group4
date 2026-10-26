@@ -2,6 +2,8 @@
 
 A competitive maths game for kids aged 6 to 9. Two players answer addition and subtraction questions, and every right answer pulls the rope their way. Students play against a classmate or the computer; teachers see how their class is doing.
 
+**Database/dashboard/leaderboard setup:** follow [docs/TEAM-DATABASE-SETUP.md](docs/TEAM-DATABASE-SETUP.md). Open the outer folder containing this README, `backend` and `frontend`. An older nested `PRJ381_MTOW_Group4-dev` folder in the uploaded source is not the active application.
+
 VIR-BCOM Group 4 (PRJ381).
 
 ---
@@ -67,13 +69,13 @@ PRJ381_MTOW_Group4/
 ├── backend/                  The server (Node.js)
 │   ├── server.js             Starts everything: game server, API and the game page
 │   ├── src/mtow/             Game server: matchmaking, matches, questions, scoring, player data
-│   ├── src/routes/           API routes (analytics, more to come)
+│   ├── src/routes/           Auth, sessions, analytics and competition leaderboard API routes
 │   ├── src/controllers/      What each API route does
 │   ├── src/services/         Shared logic (matchmaking queue, analytics)
 │   ├── test/  tests/         Automated tests (run with npm test)
 │   ├── docs/                 Analytics documentation
 │   ├── public/               The game build goes here (you add it; not in git)
-│   └── data/                 Saved player data (created automatically; not in git)
+│   └── .env                  Private MongoDB settings (create locally; never commit)
 ├── frontend/                 The website
 │   ├── index.html            Home page
 │   ├── pages/                All other pages (Play, Dashboard, Leaderboard, ...)
@@ -96,7 +98,7 @@ You only do this once per computer. The commands are for Windows.
 
 | Tool | Download | Check it works (should print a version) |
 |---|---|---|
-| Node.js (LTS, version 18 or newer) | https://nodejs.org | `node -v` |
+| Node.js (supported LTS, version 22 or newer) | https://nodejs.org | `node -v` |
 | Git | https://git-scm.com | `git --version` |
 
 Then tell Git who you are (use the email of your GitHub account):
@@ -130,13 +132,21 @@ GitHub may ask you to sign in, because the repo is private.
 
 ```bash
 cd backend
-npm install
+npm.cmd ci
 ```
+
+Create the private configuration **before starting**:
+
+```powershell
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+```
+
+Only run that copy if `.env` does not already exist. Put your private Atlas database-user URI in `backend/.env`, set `MONGODB_DB_NAME=mtow`, and have the Atlas project owner allow your current public IP. The local `mongodb://127.0.0.1:27017` example needs a separately installed local database and does not share the team's Atlas data.
 
 ### 3.5 Check everything works
 
 ```bash
-npm test
+npm.cmd test
 ```
 
 It should end with `fail 0`. If anything fails, tell the group before changing code.
@@ -161,23 +171,28 @@ It should end with `fail 0`. If anything fails, tell the group before changing c
 From the `backend` folder:
 
 ```bash
-npm start
+npm.cmd start
 ```
 
 You should see `Multiplayer Tug-of-War Server running on port 3000`. Leave this window open. **Ctrl + C** stops the server.
 
-**To play**, open these in **two different browser windows**, then press **Play a friend** in both:
+**Open the website:** http://localhost:3000/frontend/index.html
 
-- http://localhost:3000/?name=Alice&class=TEST
-- http://localhost:3000/?name=Bob&class=TEST
+Sign in at http://localhost:3000/frontend/pages/Auth.html. A teacher account has a generated class code. Learners join with that code in separate browser profiles (or normal and private windows). Two tabs in one browser profile share a login. Creating another teacher creates another class, so its dashboard is initially empty.
 
-Both windows need the same `class=` to be matched. Change `name=` to anything. **Play the computer** works with just one window.
+The supplied browser practice page works without Unity: http://localhost:3000/frontend/practice.html. Finish the round to save total profile XP. Practice contributes to class analytics and XP; completed **PvP** games populate the competition leaderboard's wins, losses and recent battles.
+
+The ZIP does not include a Unity build. After Mark supplies a build, its host page must load `/frontend/api-client.js` before `/frontend/mtow-bridge.js`, establish the same signed-in identity and call the bridge. The old `?name=...&class=...` URLs alone do not authenticate a learner into a teacher's class. Unity build integration is separate from the browser practice/database check.
 
 **Other useful addresses:**
 
 | Address | What it is |
 |---|---|
-| http://localhost:3000/api/analytics/overview | Analytics API (see `backend/docs/analytics-api.md`) |
+| http://localhost:3000/api/health | Public database connectivity check |
+| http://localhost:3000/frontend/pages/TeacherDashboard.html | Teacher's own class analytics after sign-in |
+| http://localhost:3000/frontend/pages/Leaderboard.html | Signed-in class's competition rankings |
+
+Protected analytics and leaderboard APIs require the Bearer token supplied by the website; typing a protected API URL into the address bar does not send that token. If startup fails, run `npm.cmd run diagnose` from `backend` and follow the team setup guide.
 
 **When there is a new game build:** empty `backend\public` and extract the new zip into it. The server does not need a restart; just refresh the browser.
 

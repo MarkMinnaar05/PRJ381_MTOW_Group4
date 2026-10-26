@@ -6,7 +6,15 @@
     const refresh = document.getElementById('refreshAnalytics');
     const report = document.getElementById('downloadReport');
     const rows = document.getElementById('teacherStudentRows');
-    function message(text) { status.textContent = text; }
+    function message(text, error) {
+      status.textContent = text;
+      if (error?.status === 401) {
+        const link = document.createElement('a');
+        link.href = '/frontend/pages/Auth.html';
+        link.textContent = ' Sign in again';
+        status.appendChild(link);
+      }
+    }
     function emptyTable(text) {
       rows.replaceChildren();
       const row = document.createElement('tr');
@@ -46,17 +54,17 @@
           document.getElementById(id).textContent = '—';
         }
         emptyTable('Class data could not be loaded.');
-        message(error.message);
+        message(error.message, error);
       } finally { refresh.disabled = false; }
     }
     try {
-      const identity = await MTOWApi.request('/auth/me');
-      if (identity.user.role !== 'teacher') {
+      const user = await MTOWApi.currentUser();
+      if (user.role !== 'teacher') {
         location.href = '/frontend/pages/Auth.html';
         return;
       }
-      document.getElementById('teacherClassCode').textContent = identity.user.classCode;
-      document.getElementById('headerName').textContent = identity.user.name;
+      document.getElementById('teacherClassCode').textContent = user.classCode;
+      document.getElementById('headerName').textContent = user.name;
       refresh.addEventListener('click', load);
       report.disabled = false;
       report.addEventListener('click', async () => {
@@ -80,7 +88,7 @@
     } catch (error) {
       document.getElementById('teacherClassCode').textContent = 'Sign in to view your code';
       emptyTable('Sign in with your teacher account to view class activity.');
-      message(error.message + ' Open the sign-in page to continue.');
+      message(error.message + ' Open the sign-in page to continue.', error);
     }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

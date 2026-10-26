@@ -8,7 +8,7 @@ const rules = require('../src/mtow/rules');
 const solve = q => q.operation === '+' ? q.operand1 + q.operand2 : q.operation === '-' ? q.operand1 - q.operand2 : q.operation === '×' ? q.operand1 * q.operand2 : q.operand1 / q.operand2;
 const next = (s, e) => new Promise((resolve, reject) => { const timer = setTimeout(() => reject(new Error('Timed out: ' + e)), 15000); s.once(e, p => { clearTimeout(timer); resolve(p); }); });
 test('real MongoDB API, ownership, concurrency, analytics, socket persistence, and restart', { timeout: 90000 }, async t => {
- const mongo = await MongoMemoryServer.create({ binary: { version: '8.2.6' }, instance: { args: ['--nounixsocket', '--wiredTigerCacheSizeGB', '0.25'] } });
+ const mongo = await MongoMemoryServer.create({ binary: { version: '8.2.6' }, instance: { args: [...(process.platform === 'win32' ? [] : ['--nounixsocket']), '--wiredTigerCacheSizeGB', '0.25'] } });
  const c = await connectDatabase(mongo.getUri(), 'mtow_test');
  let runtime, base;
  async function boot() { runtime = createApplication(c.db); await new Promise(r => runtime.server.listen(0, '127.0.0.1', r)); base = 'http://127.0.0.1:' + runtime.server.address().port; }
